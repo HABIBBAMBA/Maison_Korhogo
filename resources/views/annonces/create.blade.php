@@ -1073,7 +1073,7 @@
                     </div>
                     <div class="field">
                         <label for="date_disponibilite" class="form-label">Date de disponibilité</label>
-                        <input type="date" name="date_disponibilite" id="date_disponibilite" class="form-input" value="{{ old('date_disponibilite') }}">
+                        <input type="date" name="date_disponibilite" id="date_disponibilite" class="form-input" value="{{ old('date_disponibilite') }}" required>
                     </div>
                 </div>
             </div>
@@ -1431,11 +1431,11 @@
                 <div class="grid-2">
                     <div class="field">
                         <label for="quartier" class="form-label">Quartier</label>
-                        <input type="text" name="quartier" id="quartier" class="form-input" placeholder="Ex : Riviera 2" value="{{ old('quartier') }}">
+                        <input type="text" name="quartier" id="quartier" class="form-input" placeholder="Ex : Riviera 2" value="{{ old('quartier') }}" required>
                     </div>
                     <div class="field">
                         <label for="adresse" class="form-label">Adresse précise</label>
-                        <input type="text" name="adresse" id="adresse" class="form-input" placeholder="Ex : Face à la pharmacie du stade" value="{{ old('adresse') }}">
+                        <input type="text" name="adresse" id="adresse" class="form-input" placeholder="Ex : Face à la pharmacie du stade" value="{{ old('adresse') }}" required>
                     </div>
                 </div>
             </div>
@@ -1539,11 +1539,9 @@
                 if (!selected) return;
                 const type = selected.value;
 
-                // Toggle panels
                 document.querySelectorAll('.carac-panel').forEach(p => {
                     const isActive = p.dataset.type === type;
                     p.classList.toggle('active', isActive);
-                    // Disable inputs in hidden panels so they don't interfere with validation
                     p.querySelectorAll('input, select, textarea').forEach(el => {
                         if (!isActive) {
                             el.setAttribute('data-was-required', el.required ? '1' : '0');
@@ -1556,7 +1554,6 @@
                     });
                 });
 
-                // Update badge with animation
                 const badge = document.getElementById('caracBadge');
                 badge.style.opacity = '0';
                 setTimeout(() => {
@@ -1565,67 +1562,111 @@
                 }, 150);
             }
 
-            // Initialize on load
             updateCaracteristiques();
-
-            // Listen for type changes
             document.querySelectorAll('input[name="type_bien"]').forEach(radio => {
                 radio.addEventListener('change', updateCaracteristiques);
             });
 
-            // ── Upload preview ──
-            const input = document.getElementById('imageInput');
-            const grid = document.getElementById('previewGrid');
-            let files = [];
+            // ═══════════════════════════════════════
+            //  UPLOAD & PREVIEW — REWRITE COMPLET
+            // ═══════════════════════════════════════
+            const imageInput = document.getElementById('imageInput');
+            const previewGrid = document.getElementById('previewGrid');
+            const uploadZone = document.getElementById('uploadZone');
+            const bienForm = document.getElementById('bienForm');
 
-            if (input) input.addEventListener('change', e => handleFiles(e.target.files));
+            // Tableau interne qui stocke les fichiers sélectionnés
+            const selectedFiles = [];
 
-            function handleFiles(newFiles) {
-                for (let f of newFiles) {
-                    if (files.length >= 10) break;
-                    if (!f.type.match('image.*')) continue;
-                    files.push(f);
+            // ── Ajouter des fichiers ──
+            function addFiles(fileList) {
+                const incoming = Array.from(fileList);
+                for (const file of incoming) {
+                    if (selectedFiles.length >= 10) break;
+                    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) continue;
+                    selectedFiles.push(file);
                 }
                 renderPreviews();
             }
 
+            // ── Supprimer un fichier ──
+            function removeFile(index) {
+                selectedFiles.splice(index, 1);
+                renderPreviews();
+            }
+
+            // ── Rendu des previews ──
             function renderPreviews() {
-                grid.innerHTML = '';
-                files.forEach((f, i) => {
-                    const div = document.createElement('div');
-                    div.className = 'preview-item';
-                    const img = document.createElement('img');
-                    img.src = URL.createObjectURL(f);
-                    img.onload = () => URL.revokeObjectURL(img.src);
-                    const btn = document.createElement('button');
+                previewGrid.innerHTML = '';
+
+                selectedFiles.forEach(function(file, index) {
+                    // Créer le conteneur
+                    var wrapper = document.createElement('div');
+                    wrapper.className = 'preview-item';
+
+                    // Créer l'élément img (src vide pour l'instant)
+                    var img = document.createElement('img');
+                    img.alt = 'Photo ' + (index + 1);
+
+                    // Bouton supprimer
+                    var btn = document.createElement('button');
                     btn.type = 'button';
                     btn.className = 'remove-btn';
                     btn.innerHTML = '<i class="ph ph-x"></i>';
-                    btn.onclick = () => {
-                        files.splice(i, 1);
-                        renderPreviews();
-                    };
-                    div.appendChild(img);
-                    div.appendChild(btn);
-                    grid.appendChild(div);
+                    btn.addEventListener('click', function() {
+                        removeFile(index);
+                    });
+
+                    wrapper.appendChild(img);
+                    wrapper.appendChild(btn);
+                    previewGrid.appendChild(wrapper);
+
+                    // ✅ Lire le fichier avec FileReader.readAsDataURL
+                    //    → le résultat est un data URL base64 encodé directement dans le src
+                    //    → PAS de blob URL, PAS de révocation nécessaire
+                    var reader = new FileReader();
+                    reader.addEventListener('load', function(e) {
+                        img.src = e.target.result;
+                    });
+                    reader.readAsDataURL(file);
                 });
-                const dt = new DataTransfer();
-                files.forEach(f => dt.items.add(f));
-                input.files = dt.files;
             }
 
-            // ── Drag & drop ──
-            const zone = document.getElementById('uploadZone');
-            if (zone) {
-                zone.addEventListener('dragover', e => {
-                    e.preventDefault();
-                    zone.classList.add('dragover');
+            // ── Écouteur sur l'input file ──
+            if (imageInput) {
+                imageInput.addEventListener('change', function() {
+                    addFiles(this.files);
+                    // ✅ Réinitialiser pour permettre de resélectionner les mêmes fichiers
+                    this.value = '';
                 });
-                zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
-                zone.addEventListener('drop', e => {
+            }
+
+            // ── Synchroniser les fichiers vers l'input AVANT la soumission ──
+            if (bienForm) {
+                bienForm.addEventListener('submit', function() {
+                    if (selectedFiles.length === 0) return;
+
+                    var dt = new DataTransfer();
+                    selectedFiles.forEach(function(f) {
+                        dt.items.add(f);
+                    });
+                    imageInput.files = dt.files;
+                });
+            }
+
+            // ── Drag & Drop ──
+            if (uploadZone) {
+                uploadZone.addEventListener('dragover', function(e) {
                     e.preventDefault();
-                    zone.classList.remove('dragover');
-                    handleFiles(e.dataTransfer.files);
+                    uploadZone.classList.add('dragover');
+                });
+                uploadZone.addEventListener('dragleave', function() {
+                    uploadZone.classList.remove('dragover');
+                });
+                uploadZone.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    uploadZone.classList.remove('dragover');
+                    addFiles(e.dataTransfer.files);
                 });
             }
         });

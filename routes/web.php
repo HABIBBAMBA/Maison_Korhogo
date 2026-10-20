@@ -1,13 +1,17 @@
 <?php
 
-use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AgenceController;
+use App\Http\Controllers\Admin\BienController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AnnonceController;
-use App\Models\Annonce;
-use App\Models\Contact;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ContactController;
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\GoogleController;
-
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\ProfileController;
+use App\Models\Annonce;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 // ===========================
 //  PAGE D'ACCUEIL (avec données)
@@ -19,13 +23,19 @@ Route::get('/', function () {
         ->limit(8)
         ->get();
 
+    $heroPhotos = collect(Storage::disk('public')->files('hero'))
+        ->filter(fn (string $path) => in_array(strtolower(pathinfo($path, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'webp'], true))
+        ->sort()
+        ->map(fn (string $path) => '/storage/'.$path)
+        ->values();
+
     $stats = [
-        'total'    => Annonce::where('statut', 'active')->count(),
-        'vente'    => Annonce::where('statut', 'active')->where('type_offre', 'vente')->count(),
+        'total' => Annonce::where('statut', 'active')->count(),
+        'vente' => Annonce::where('statut', 'active')->where('type_offre', 'vente')->count(),
         'location' => Annonce::where('statut', 'active')->where('type_offre', 'location')->count(),
     ];
 
-    return view('pages.home', compact('annoncesRecentes', 'stats'));
+    return view('pages.home', compact('annoncesRecentes', 'heroPhotos', 'stats'));
 })->name('home');
 
 // ===========================
@@ -48,9 +58,9 @@ Route::get('/biens', function () {
 // ===========================
 Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])
@@ -63,8 +73,13 @@ Route::post('/logout', [AuthController::class, 'logout'])
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         $user = auth()->user();
+
         return view('pages.dashboard', compact('user'));
     })->name('dashboard');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 // ═══════════════════════════════════════
@@ -103,18 +118,17 @@ Route::middleware('auth')->group(function () {
 //  ROUTES CONTACTS
 // ═══════════════════════════════════════
 
-
-
 Route::middleware('auth')->group(function () {
     Route::get('/annonces/{annonce}/contact', [ContactController::class, 'create'])
         ->name('contacts.create');
 
     Route::post('/contacts', [ContactController::class, 'store'])
-        ->name('contacts.store');
+        ->name('contacts.store')
+        ->middleware('throttle:10,1');
 });
 
 // Dashboard protégé
-Route::middleware(['auth', 'role:admin'])->group(function () {
+Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/contacts', [ContactController::class, 'index'])
         ->name('contacts.index');
 
@@ -122,5 +136,27 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         ->name('contacts.destroy');
 });
 
+// ═══════════════════════════════════════
+//  ROUTES AUTH GOOGLE
+// ═══════════════════════════════════════
+
 Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('google.redirect');
 Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('google.callback');
+
+// ═══════════════════════════════════════
+// ADMIN — Routes protégées par rôle admin
+// ═══════════════════════════════════════
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+
+    // Dashboard admin
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    // Utilisateurs
+    Route::resource('users', UserController::class);
+
+    // Biens
+    Route::resource('biens', BienController::class);
+
+    // Agences
+    Route::resource('agences', AgenceController::class);
+});

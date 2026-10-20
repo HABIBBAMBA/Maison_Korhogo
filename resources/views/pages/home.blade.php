@@ -5,7 +5,19 @@
 @section('content')
 
 <!-- ===== HERO SECTION ===== -->
-<section style="
+@php
+    $heroImages = $heroPhotos->isNotEmpty()
+        ? $heroPhotos
+        : $annoncesRecentes
+            ->flatMap(fn ($annonce) => $annonce->images ?? [])
+            ->filter(fn ($image) => is_string($image) && $image !== '')
+            ->unique()
+            ->take(5)
+            ->map(fn ($image) => asset('storage/' . $image))
+            ->values();
+@endphp
+
+<section data-hero-carousel style="
     position: relative;
     min-height: 85vh;
     display: flex;
@@ -13,29 +25,23 @@
     background: linear-gradient(135deg, #284b63 0%, #3c6e71 50%, #284b63 100%);
     overflow: hidden;
 ">
-    <div style="
+    <div class="hero-carousel__slides" aria-hidden="true">
+        @foreach($heroImages as $image)
+        <img
+            src="{{ $image }}"
+            class="hero-carousel__slide{{ $loop->first ? ' is-active' : '' }}"
+            alt=""
+            loading="{{ $loop->first ? 'eager' : 'lazy' }}"
+            fetchpriority="{{ $loop->first ? 'high' : 'auto' }}">
+        @endforeach
+    </div>
+    <div class="hero-carousel__overlay" aria-hidden="true" style="
         position: absolute;
         inset: 0;
-        background-image: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22><circle cx=%221%22 cy=%221%22 r=%221%22 fill=%22rgba(255,255,255,0.05)%22 /></svg>');
-        background-size: 60px 60px;
+        background: linear-gradient(90deg, rgba(20, 42, 58, 0.9) 0%, rgba(40, 75, 99, 0.72) 55%, rgba(40, 75, 99, 0.42) 100%);
     "></div>
 
-    <div style="
-        position: absolute;
-        top: -150px; right: -100px;
-        width: 500px; height: 500px;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.03);
-    "></div>
-    <div style="
-        position: absolute;
-        bottom: -100px; left: -50px;
-        width: 300px; height: 300px;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.02);
-    "></div>
-
-    <div style="position: relative; max-width: 1200px; margin: 0 auto; padding: 2rem; width: 100%;">
+    <div style="position: relative; z-index: 2; max-width: 1200px; margin: 0 auto; padding: 2rem; width: 100%;">
         <div style="max-width: 650px;">
             <span style="
                 display: inline-block;
@@ -118,7 +124,131 @@
             </div>
         </div>
     </div>
+
+    @if($heroImages->count() > 1)
+    <div
+        class="hero-carousel__controls"
+        role="group"
+        aria-label="Navigation du carrousel"
+        style="position: absolute; right: max(2rem, calc((100vw - 1200px) / 2 + 2rem)); bottom: 2rem; z-index: 3; display: flex; align-items: center; gap: 0.75rem;">
+        <button
+            type="button"
+            data-carousel-previous
+            aria-label="Diapositive précédente"
+            style="width: 2.75rem; height: 2.75rem; border: 1px solid rgba(255,255,255,0.55); border-radius: 50%; background: rgba(0,0,0,0.2); color: white; cursor: pointer;">
+            <i class="bi bi-chevron-left" aria-hidden="true"></i>
+        </button>
+        @foreach($heroImages as $index => $image)
+            <button
+                type="button"
+                class="hero-carousel__dot{{ $loop->first ? ' is-active' : '' }}"
+                data-carousel-dot="{{ $index }}"
+                aria-label="Afficher la diapositive {{ $index + 1 }}"
+                aria-pressed="{{ $loop->first ? 'true' : 'false' }}">
+            </button>
+        @endforeach
+        <button
+            type="button"
+            data-carousel-next
+            aria-label="Diapositive suivante"
+            style="width: 2.75rem; height: 2.75rem; border: 1px solid rgba(255,255,255,0.55); border-radius: 50%; background: rgba(0,0,0,0.2); color: white; cursor: pointer;">
+            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+        </button>
+    </div>
+    @endif
 </section>
+
+@push('styles')
+<style>
+    .hero-carousel__slides {
+        position: absolute;
+        inset: 0;
+    }
+
+    .hero-carousel__slide {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 800ms ease;
+    }
+
+    .hero-carousel__slide.is-active {
+        opacity: 1;
+    }
+
+    .hero-carousel__overlay {
+        z-index: 1;
+    }
+
+    .hero-carousel__dot {
+        width: 0.65rem;
+        height: 0.65rem;
+        padding: 0;
+        border: 0;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.55);
+        cursor: pointer;
+        transition: all 300ms ease;
+    }
+
+    .hero-carousel__dot.is-active {
+        width: 1.5rem;
+        background: white;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .hero-carousel__slide,
+        .hero-carousel__dot {
+            transition: none;
+        }
+    }
+</style>
+@endpush
+
+@push('scripts')
+<script>
+    document.querySelectorAll('[data-hero-carousel]').forEach((carousel) => {
+        const slides = Array.from(carousel.querySelectorAll('.hero-carousel__slide'));
+        const dots = Array.from(carousel.querySelectorAll('[data-carousel-dot]'));
+        const previousButton = carousel.querySelector('[data-carousel-previous]');
+        const nextButton = carousel.querySelector('[data-carousel-next]');
+
+        if (slides.length < 2 || !previousButton || !nextButton) {
+            return;
+        }
+
+        let activeIndex = 0;
+
+        const showSlide = (index) => {
+            activeIndex = (index + slides.length) % slides.length;
+
+            slides.forEach((slide, slideIndex) => {
+                slide.classList.toggle('is-active', slideIndex === activeIndex);
+            });
+
+            dots.forEach((dot, dotIndex) => {
+                const isActive = dotIndex === activeIndex;
+                dot.classList.toggle('is-active', isActive);
+                dot.setAttribute('aria-pressed', String(isActive));
+            });
+        };
+
+        previousButton.addEventListener('click', () => showSlide(activeIndex - 1));
+        nextButton.addEventListener('click', () => showSlide(activeIndex + 1));
+
+        dots.forEach((dot, index) => {
+            dot.addEventListener('click', () => showSlide(index));
+        });
+
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            window.setInterval(() => showSlide(activeIndex + 1), 6000);
+        }
+    });
+</script>
+@endpush
 
 <!-- ===== SECTION BIENS RÉCENTS ===== -->
 <section style="max-width: 1200px; margin: 0 auto; padding: 5rem 2rem;">

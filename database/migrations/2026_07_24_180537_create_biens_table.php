@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('adresse')->nullable();
             $table->decimal('prix', 15, 2);
             $table->integer('nombre_pieces')->nullable();
-            $table->enum('statut', ['disponible', 'loue', 'vendu'])->default('disponible');
+            $table->enum('statut', ['disponible', 'loue', 'vendu', 'en_negociation'])->default('disponible');
 
             $table->foreignId('id_agence')
                 ->nullable()

@@ -1,23 +1,14 @@
 @extends('layouts.app')
-@php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
-@endphp
 
 @section('content')
 
 <style>
-    body {
-        background: #f5f5f0;
-        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    }
-
     .detail-container {
         max-width: 900px;
         margin: 0 auto;
+        padding: 2rem;
     }
 
-    /* NAVIGATION */
     .detail-nav {
         display: flex;
         align-items: center;
@@ -29,14 +20,14 @@ error_reporting(E_ALL);
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        color: #2d5016;
+        color: var(--teal);
         text-decoration: none;
-        font-weight: 500;
+        font-weight: 600;
         font-size: 0.9rem;
     }
 
     .detail-nav a:hover {
-        color: #4a7c28;
+        color: var(--primary);
     }
 
     .detail-statut {
@@ -47,13 +38,13 @@ error_reporting(E_ALL);
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-        background: #e8f5e9;
-        color: #2e7d32;
+        background: rgba(var(--teal-rgb), 0.1);
+        color: var(--teal);
     }
 
     .detail-statut.indisponible {
-        background: #fce4ec;
-        color: #c62828;
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger);
     }
 
     /* CARROUSEL */
@@ -114,14 +105,14 @@ error_reporting(E_ALL);
         border-radius: 50%;
         font-size: 1.1rem;
         cursor: pointer;
-        color: #1a3a0a;
+        color: var(--dark);
         z-index: 2;
         transition: all 0.2s ease;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
 
     .carousel-btn:hover {
-        background: #2d5016;
+        background: var(--primary);
         color: #fff;
     }
 
@@ -151,7 +142,7 @@ error_reporting(E_ALL);
     .detail-title {
         font-size: 1.75rem;
         font-weight: 700;
-        color: #1a3a0a;
+        color: var(--dark);
         line-height: 1.2;
     }
 
@@ -159,7 +150,7 @@ error_reporting(E_ALL);
         display: flex;
         align-items: center;
         gap: 0.4rem;
-        color: #6b7c5e;
+        color: var(--gray-500);
         font-size: 0.9rem;
         margin-top: 0.25rem;
     }
@@ -168,8 +159,8 @@ error_reporting(E_ALL);
         display: inline-block;
         font-size: 1.5rem;
         font-weight: 700;
-        color: #2d5016;
-        background: linear-gradient(135deg, #e8f5e9 0%, #dcedc8 100%);
+        color: var(--teal);
+        background: rgba(var(--teal-rgb), 0.08);
         padding: 0.75rem 1.25rem;
         border-radius: 12px;
         width: fit-content;
@@ -186,17 +177,17 @@ error_reporting(E_ALL);
         display: flex;
         align-items: center;
         gap: 0.6rem;
-        background: #fff;
+        background: var(--white);
         padding: 0.75rem 1rem;
         border-radius: 10px;
-        border: 1px solid #e0e0d8;
+        border: 1px solid var(--gray-100);
     }
 
     .stat-icon {
         width: 36px;
         height: 36px;
         border-radius: 8px;
-        background: linear-gradient(135deg, #2d5016 0%, #4a7c28 100%);
+        background: linear-gradient(135deg, var(--primary), var(--teal));
         color: #fff;
         display: flex;
         align-items: center;
@@ -206,29 +197,29 @@ error_reporting(E_ALL);
 
     .stat-value {
         font-weight: 700;
-        color: #1a3a0a;
+        color: var(--dark);
         font-size: 0.95rem;
     }
 
     .stat-label {
         font-size: 0.7rem;
-        color: #8a8a7a;
+        color: var(--gray-500);
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
 
     /* SECTIONS */
     .detail-section {
-        background: #fff;
+        background: var(--white);
         border-radius: 14px;
         padding: 1.5rem;
-        border: 1px solid #e0e0d8;
+        border: 1px solid var(--gray-100);
     }
 
     .section-title {
         font-size: 1.1rem;
         font-weight: 700;
-        color: #1a3a0a;
+        color: var(--dark);
         margin-bottom: 1rem;
         display: flex;
         align-items: center;
@@ -236,7 +227,7 @@ error_reporting(E_ALL);
     }
 
     .detail-description {
-        color: #4a4a3a;
+        color: var(--gray-700);
         line-height: 1.7;
         font-size: 0.95rem;
         white-space: pre-wrap;
@@ -254,16 +245,16 @@ error_reporting(E_ALL);
         align-items: center;
         gap: 0.4rem;
         padding: 0.5rem 0.9rem;
-        background: linear-gradient(135deg, #f5f5f0 0%, #eef2e8 100%);
-        border: 1px solid #d4ddc8;
+        background: rgba(var(--teal-rgb), 0.06);
+        border: 1px solid rgba(var(--teal-rgb), 0.15);
         border-radius: 8px;
         font-size: 0.8rem;
-        color: #3a5a20;
+        color: var(--teal);
         font-weight: 500;
     }
 
     .equipement-tag .check {
-        color: #4a7c28;
+        color: var(--teal);
         font-weight: 700;
     }
 
@@ -277,10 +268,10 @@ error_reporting(E_ALL);
     }
 
     .sidebar-card {
-        background: #fff;
+        background: var(--white);
         border-radius: 14px;
         padding: 1.5rem;
-        border: 1px solid #e0e0d8;
+        border: 1px solid var(--gray-100);
     }
 
     .owner-info {
@@ -294,7 +285,7 @@ error_reporting(E_ALL);
         width: 48px;
         height: 48px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #2d5016 0%, #4a7c28 100%);
+        background: linear-gradient(135deg, var(--primary), var(--teal));
         color: #fff;
         display: flex;
         align-items: center;
@@ -305,12 +296,12 @@ error_reporting(E_ALL);
 
     .owner-name {
         font-weight: 700;
-        color: #1a3a0a;
+        color: var(--dark);
     }
 
     .owner-role {
         font-size: 0.75rem;
-        color: #8a8a7a;
+        color: var(--gray-500);
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
@@ -333,7 +324,7 @@ error_reporting(E_ALL);
     }
 
     .btn-appeler {
-        background: linear-gradient(135deg, #2d5016 0%, #4a7c28 100%);
+        background: linear-gradient(135deg, var(--primary), var(--teal));
         color: #fff;
     }
 
@@ -356,16 +347,16 @@ error_reporting(E_ALL);
     }
 
     .btn-message {
-        background: #fff;
-        color: #2d5016;
+        background: var(--white);
+        color: var(--teal);
         border: 2px solid #d4ddc8;
     }
 
     .btn-message:hover {
-        border-color: #2d5016;
+        border-color: var(--teal);
         background: #f5f5f0;
         transform: translateY(-2px);
-        color: #2d5016;
+        color: var(--teal);
     }
 
     .sidebar-actions {
@@ -391,7 +382,7 @@ error_reporting(E_ALL);
     }
 
     .modal-content {
-        background: #fff;
+        background: var(--white);
         border-radius: 16px;
         padding: 2rem;
         max-width: 380px;
@@ -415,7 +406,7 @@ error_reporting(E_ALL);
     .modal-phone {
         font-size: 1.6rem;
         font-weight: 700;
-        color: #1a3a0a;
+        color: var(--dark);
         margin: 1rem 0;
         letter-spacing: 2px;
     }
@@ -433,14 +424,14 @@ error_reporting(E_ALL);
     .modal-fermer {
         background: none;
         border: none;
-        color: #8a8a7a;
+        color: var(--gray-500);
         cursor: pointer;
         font-size: 0.85rem;
         margin-top: 0.75rem;
     }
 
     .modal-fermer:hover {
-        color: #1a3a0a;
+        color: var(--dark);
     }
 
     /* RESPONSIVE */
@@ -529,7 +520,7 @@ error_reporting(E_ALL);
                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                         <circle cx="12" cy="10" r="3" />
                     </svg>
-                    {{ $annonce->quartier ? $annonce->quartier . ', ' : '' }}{{ $annonce->ville ?? '' }}
+                    {{ $annonce->quartier ?? $annonce->adresse ?? '' }}
                 </div>
             </div>
 
@@ -537,7 +528,7 @@ error_reporting(E_ALL);
             <div class="detail-prix-badge">
                 {{ number_format($annonce->prix, 0, ',', ' ') }} FCFA
                 @if($annonce->type_offre === 'location')
-                <span style="font-size:0.85rem;font-weight:400;color:#6b7c5e"> / mois</span>
+                <span style="font-size:0.85rem;font-weight:400;color:var(--gray-500)"> / mois</span>
                 @endif
             </div>
 
@@ -719,11 +710,11 @@ error_reporting(E_ALL);
 <div class="modal-overlay" id="modalAppel">
     <div class="modal-content">
         <div style="font-size:1.5rem;margin-bottom:0.5rem;">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2d5016" stroke-width="2">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2">
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
             </svg>
         </div>
-        <p style="color:#6b7c5e;font-size:0.85rem;">Numero de telephone</p>
+        <p style="color:var(--gray-500);font-size:0.85rem;">Numero de telephone</p>
         <div class="modal-phone">{{ $telephone }}</div>
         <div class="modal-actions">
             <a href="tel:{{ $telephone }}" class="btn-action btn-appeler" style="flex:1;">

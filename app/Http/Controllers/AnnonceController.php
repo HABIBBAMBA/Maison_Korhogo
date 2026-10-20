@@ -12,38 +12,46 @@ class AnnonceController extends Controller
     // INDEX — Liste des annonces (page publique)
     public function index(Request $request)
     {
+        $filters = $request->validate([
+            'recherche' => 'nullable|string|max:255',
+            'type_bien' => 'nullable|string|in:appartement,maison,villa,terrain,bureau,commerce,chambre,magasin,entrepot,autre',
+            'type_offre' => 'nullable|string|in:vente,location',
+            'categorie' => 'nullable|string|in:vente,location',
+            'prix_min' => 'nullable|numeric|min:0',
+            'prix_max' => 'nullable|numeric|min:0',
+        ]);
+
         $query = Annonce::with('user')
             ->where('statut', 'active')
             ->latest();
 
-        if ($request->filled('recherche')) {
-            $search = $request->recherche;
+        if (! empty($filters['recherche'])) {
+            $search = $filters['recherche'];
             $query->where(function ($q) use ($search) {
                 $q->where('titre', 'LIKE', "%{$search}%")
                     ->orWhere('description', 'LIKE', "%{$search}%")
-                    ->orWhere('ville', 'LIKE', "%{$search}%")
                     ->orWhere('quartier', 'LIKE', "%{$search}%");
             });
         }
 
-        if ($request->filled('type_bien')) {
-            $query->where('type_bien', $request->type_bien);
+        if (! empty($filters['type_bien'])) {
+            $query->where('type_bien', $filters['type_bien']);
         }
 
-        if ($request->filled('type_offre')) {
-            $query->where('type_offre', $request->type_offre);
+        if (! empty($filters['type_offre'])) {
+            $query->where('type_offre', $filters['type_offre']);
         }
 
-        if ($request->filled('categorie')) {
-            $query->where('categorie', $request->categorie);
+        if (! empty($filters['categorie'])) {
+            $query->where('categorie', $filters['categorie']);
         }
 
-        if ($request->filled('prix_min')) {
-            $query->where('prix', '>=', $request->prix_min);
+        if (! empty($filters['prix_min'])) {
+            $query->where('prix', '>=', $filters['prix_min']);
         }
 
-        if ($request->filled('prix_max')) {
-            $query->where('prix', '<=', $request->prix_max);
+        if (! empty($filters['prix_max'])) {
+            $query->where('prix', '<=', $filters['prix_max']);
         }
 
         $annonces = $query->paginate(12)->withQueryString();
@@ -71,33 +79,33 @@ class AnnonceController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'type_offre'         => 'required|string|in:vente,location',
-            'type_bien'          => 'required|string|in:appartement,maison,villa,terrain,bureau,commerce,chambre,magasin,entrepot,autre',
-            'titre'              => 'required|string|max:255',
-            'description'        => 'required|string|min:20',
-            'prix'               => 'required|numeric|min:0',
+            'type_offre' => 'required|string|in:vente,location',
+            'type_bien' => 'required|string|in:appartement,maison,villa,terrain,bureau,commerce,chambre,magasin,entrepot,autre',
+            'titre' => 'required|string|max:255',
+            'description' => 'required|string|min:20',
+            'prix' => 'required|numeric|min:0',
             'date_disponibilite' => 'required|date',
-            'superficie'         => 'nullable|numeric|min:0',
-            'nombre_chambres'    => 'nullable|integer|min:0',
+            'superficie' => 'nullable|numeric|min:0',
+            'nombre_chambres' => 'nullable|integer|min:0',
             'nombre_salles_bain' => 'nullable|integer|min:0',
-            'nombre_pieces'      => 'nullable|integer|min:0',
-            'quartier'           => 'required|string|max:255',
-            'adresse'            => 'required|string|max:255',
-            'equipements'        => 'nullable|array',
-            'equipements.*'      => 'string',
+            'nombre_pieces' => 'nullable|integer|min:0',
+            'quartier' => 'required|string|max:255',
+            'adresse' => 'required|string|max:255',
+            'equipements' => 'nullable|array',
+            'equipements.*' => 'string',
+            'images' => 'nullable|array|max:10',
+            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:5120',
         ]);
 
         // Upload des images
         $imagesPaths = [];
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                $imagesPaths[] = $image->store('annonces', 'public');
-            }
+        foreach ($request->file('images', []) as $image) {
+            $imagesPaths[] = $image->store('annonces', 'public');
         }
 
-        $validated['images']    = $imagesPaths;
-        $validated['id_user']   = Auth::id();
-        $validated['statut']    = 'active';
+        $validated['images'] = $imagesPaths;
+        $validated['id_user'] = Auth::id();
+        $validated['statut'] = 'active';
         $validated['categorie'] = $validated['type_offre'];
 
         Annonce::create($validated);
@@ -145,31 +153,29 @@ class AnnonceController extends Controller
 
         $validated = $request->validate([
             // ── Informations ──
-            'titre'              => 'required|string|max:255',
-            'description'        => 'required|string|min:20',
-            'type_bien'          => 'required|string|in:appartement,maison,villa,terrain,bureau,commerce,chambre,magasin,entrepot,autre',
-            'type_offre'         => 'required|string|in:vente,location',
-            'statut'             => 'required|in:active,vendu,loue,inactive',
+            'titre' => 'required|string|max:255',
+            'description' => 'required|string|min:20',
+            'type_bien' => 'required|string|in:appartement,maison,villa,terrain,bureau,commerce,chambre,magasin,entrepot,autre',
+            'type_offre' => 'required|string|in:vente,location',
+            'statut' => 'required|in:active,vendu,loue,inactive',
 
             // ── Caractéristiques ──
-            'prix'               => 'required|numeric|min:0',
+            'prix' => 'required|numeric|min:0',
             'date_disponibilite' => 'nullable|date',
-            'superficie'         => 'nullable|numeric|min:0',
-            'nombre_pieces'      => 'nullable|integer|min:0',
-            'nombre_chambres'    => 'nullable|integer|min:0',
+            'superficie' => 'nullable|numeric|min:0',
+            'nombre_pieces' => 'nullable|integer|min:0',
+            'nombre_chambres' => 'nullable|integer|min:0',
             'nombre_salles_bain' => 'nullable|integer|min:0',
 
             // ── Localisation ──
-            'adresse'            => 'nullable|string|max:255',
-            'quartier'           => 'nullable|string|max:255',
+            'adresse' => 'nullable|string|max:255',
+            'quartier' => 'nullable|string|max:255',
 
             // ── Équipements ──
-            'equipements'        => 'nullable|array',
-            'equipements.*'      => 'string',
-
-            // ── Images ──
-            'images'             => 'nullable|array|max:8',
-            'images.*'           => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+            'equipements' => 'nullable|array',
+            'equipements.*' => 'string',
+            'images' => 'nullable|array|max:10',
+            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:5120',
         ]);
 
         // categorie reste alignée sur type_offre, comme dans store()

@@ -121,9 +121,13 @@
                         <td>{{ $contact->email }}</td>
                         <td>{{ $contact->telephone }}</td>
                         <td>
-                            <a href="{{ route('annonces.show', $contact->annonce->id) }}">
-                                {{ $contact->annonce->titre ?? '—' }}
+                            @if($contact->bien)
+                            <a href="{{ route('admin.biens.show', $contact->bien->id) }}">
+                                {{ $contact->bien->titre ?? '—' }}
                             </a>
+                            @else
+                            —
+                            @endif
                         </td>
                         <td class="msg-cell">{{ Str::limit($contact->message, 80) }}</td>
                         <td>{{ $contact->created_at->format('d/m/Y H:i') }}</td>

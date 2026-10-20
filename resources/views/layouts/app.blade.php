@@ -108,6 +108,21 @@
             color: var(--primary-dark);
         }
 
+        :focus-visible {
+            outline: 2px solid var(--teal);
+            outline-offset: 2px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
         /* ╔══════════════════════════════════════════════╗
            ║  NAVBAR                                     ║
            ╚══════════════════════════════════════════════╝ */
@@ -270,6 +285,11 @@
 
         .btn-primary:active {
             transform: translateY(0);
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--teal);
+            outline-offset: 2px;
         }
 
         .btn-outline {

@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 
 class ContactController extends Controller
 {
-
     // ── Formulaire de contact sur une annonce ──
     public function create($annonceId)
     {
@@ -20,12 +19,12 @@ class ContactController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nom'       => 'required|string|max:255',
+            'nom' => 'required|string|max:255',
             'telephone' => 'required|string|max:20',
-            'prenom'    => 'nullable|string|max:255',
-            'email'     => 'required|email|max:255',
-            'message'   => 'required|string|max:5000',
-            'id_bien'   => 'required|exists:annonces,id',
+            'prenom' => 'nullable|string|max:255',
+            'email' => 'required|email|max:255',
+            'message' => 'required|string|max:5000',
+            'id_bien' => 'required|exists:biens,id',
         ]);
 
         Contact::create($validated);
@@ -38,7 +37,7 @@ class ContactController extends Controller
     // ── Dashboard : tous les contacts (protégé) ──
     public function index()
     {
-        $contacts = Contact::with('annonce')
+        $contacts = Contact::with('bien')
             ->latest()
             ->paginate(15);
 

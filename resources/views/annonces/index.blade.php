@@ -492,22 +492,26 @@
             </div>
             <div class="filter-group">
                 <label>Type</label>
-                <select name="type">
+                <select name="type_bien">
                     <option value="">Tous</option>
-                    <option value="maison" {{ request('type') == 'maison' ? 'selected' : '' }}>Maison</option>
-                    <option value="appartement" {{ request('type') == 'appartement' ? 'selected' : '' }}>Appartement</option>
-                    <option value="terrain" {{ request('type') == 'terrain' ? 'selected' : '' }}>Terrain</option>
-                    <option value="bureau" {{ request('type') == 'bureau' ? 'selected' : '' }}>Bureau</option>
-                    <option value="commerce" {{ request('type') == 'commerce' ? 'selected' : '' }}>Commerce</option>
-                    <option value="entrepot" {{ request('type') == 'entrepot' ? 'selected' : '' }}>Entrepôt</option>
+                    <option value="maison" {{ request('type_bien') == 'maison' ? 'selected' : '' }}>Maison</option>
+                    <option value="appartement" {{ request('type_bien') == 'appartement' ? 'selected' : '' }}>Appartement</option>
+                    <option value="villa" {{ request('type_bien') == 'villa' ? 'selected' : '' }}>Villa</option>
+                    <option value="terrain" {{ request('type_bien') == 'terrain' ? 'selected' : '' }}>Terrain</option>
+                    <option value="bureau" {{ request('type_bien') == 'bureau' ? 'selected' : '' }}>Bureau</option>
+                    <option value="commerce" {{ request('type_bien') == 'commerce' ? 'selected' : '' }}>Commerce</option>
+                    <option value="chambre" {{ request('type_bien') == 'chambre' ? 'selected' : '' }}>Chambre</option>
+                    <option value="magasin" {{ request('type_bien') == 'magasin' ? 'selected' : '' }}>Magasin</option>
+                    <option value="entrepot" {{ request('type_bien') == 'entrepot' ? 'selected' : '' }}>Entrepôt</option>
+                    <option value="autre" {{ request('type_bien') == 'autre' ? 'selected' : '' }}>Autre</option>
                 </select>
             </div>
             <div class="filter-group">
-                <label>Catégorie</label>
-                <select name="categorie">
+                <label>Offre</label>
+                <select name="type_offre">
                     <option value="">Toutes</option>
-                    <option value="vente" {{ request('categorie') == 'vente' ? 'selected' : '' }}>Vente</option>
-                    <option value="location" {{ request('categorie') == 'location' ? 'selected' : '' }}>Location</option>
+                    <option value="vente" {{ request('type_offre') == 'vente' ? 'selected' : '' }}>Vente</option>
+                    <option value="location" {{ request('type_offre') == 'location' ? 'selected' : '' }}>Location</option>
                 </select>
             </div>
             <div class="filter-group">
@@ -538,7 +542,7 @@
                             {{ ucfirst($annonce->categorie) }}
                         </span>
                         <span class="badge badge-type">
-                            {{ ucfirst($annonce->type) }}
+                            {{ ucfirst($annonce->type_bien) }}
                         </span>
                     </div>
                     @if($annonce->nombre_images > 1)
@@ -552,7 +556,7 @@
                     <div class="card-title">{{ $annonce->titre }}</div>
                     <div class="card-location">
                         <i class="bi bi-geo-alt-fill"></i>
-                        {{ $annonce->quartier ? $annonce->quartier . ', ' : '' }}{{ $annonce->ville ?? 'Non précisé' }}
+                        {{ $annonce->quartier ?? $annonce->adresse ?? 'Non précisé' }}
                     </div>
                     <div class="card-specs">
                         @if($annonce->superficie)
