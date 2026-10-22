@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Annonce;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class AnnonceController extends Controller
@@ -14,9 +15,9 @@ class AnnonceController extends Controller
     {
         $filters = $request->validate([
             'recherche' => 'nullable|string|max:255',
-            'type_bien' => 'nullable|string|in:appartement,maison,villa,terrain,bureau,commerce,chambre,magasin,entrepot,autre',
-            'type_offre' => 'nullable|string|in:vente,location',
-            'categorie' => 'nullable|string|in:vente,location',
+            'type_bien' => 'nullable|string|max:50',
+            'type_offre' => 'nullable|string|in:vente,location,court_sejour',
+            'categorie' => 'nullable|string|in:vente,location,court_sejour',
             'prix_min' => 'nullable|numeric|min:0',
             'prix_max' => 'nullable|numeric|min:0',
         ]);
@@ -35,15 +36,40 @@ class AnnonceController extends Controller
         }
 
         if (! empty($filters['type_bien'])) {
-            $query->where('type_bien', $filters['type_bien']);
+            if ($filters['type_bien'] === 'maison') {
+                $query->whereIn('type_bien', ['maison', 'appartement', 'villa']);
+            } elseif ($filters['type_bien'] === 'magasin') {
+                $query->whereIn('type_bien', ['magasin', 'commerce']);
+            } elseif (in_array($filters['type_bien'], ['hebergement', 'residence', 'hotel', 'court_sejour', 'residence_meublee', 'chambre_hotel', 'auberge'], true)) {
+                $query->where(function ($q) {
+                    $q->where('type_offre', 'court_sejour')
+                        ->orWhereIn('type_bien', ['residence_meublee', 'chambre_hotel', 'auberge']);
+                });
+            } else {
+                $query->where('type_bien', $filters['type_bien']);
+            }
         }
 
         if (! empty($filters['type_offre'])) {
-            $query->where('type_offre', $filters['type_offre']);
+            if ($filters['type_offre'] === 'court_sejour') {
+                $query->where(function ($q) {
+                    $q->where('type_offre', 'court_sejour')
+                        ->orWhereIn('type_bien', ['residence_meublee', 'chambre_hotel', 'auberge']);
+                });
+            } else {
+                $query->where('type_offre', $filters['type_offre']);
+            }
         }
 
         if (! empty($filters['categorie'])) {
-            $query->where('categorie', $filters['categorie']);
+            if ($filters['categorie'] === 'court_sejour') {
+                $query->where(function ($q) {
+                    $q->where('type_offre', 'court_sejour')
+                        ->orWhereIn('type_bien', ['residence_meublee', 'chambre_hotel', 'auberge']);
+                });
+            } else {
+                $query->where('categorie', $filters['categorie']);
+            }
         }
 
         if (! empty($filters['prix_min'])) {
@@ -62,6 +88,10 @@ class AnnonceController extends Controller
     // MY INDEX — Mes annonces
     public function myAnnonces()
     {
+        if (! Auth::user()->peutPublierAnnonce()) {
+            abort(403, 'Accès réservé aux propriétaires et agences immobilières.');
+        }
+
         $annonces = Annonce::where('id_user', Auth::id())
             ->latest()
             ->paginate(10);
@@ -72,20 +102,48 @@ class AnnonceController extends Controller
     // CREATE
     public function create()
     {
+        if (! Auth::user()->peutPublierAnnonce()) {
+            abort(403, 'Seuls les propriétaires et les agences sont autorisés à publier une annonce.');
+        }
+
         return view('annonces.create');
     }
 
     // STORE
     public function store(Request $request)
     {
+        if (! Auth::user()->peutPublierAnnonce()) {
+            abort(403, 'Seuls les propriétaires et les agences sont autorisés à publier une annonce.');
+        }
+        $filesInfo = [];
+        foreach ($request->file('images', []) as $idx => $f) {
+            $filesInfo[] = [
+                'index' => $idx,
+                'name' => $f->getClientOriginalName(),
+                'size_bytes' => $f->getSize(),
+                'error_code' => $f->getError(),
+                'error_msg' => $f->getErrorMessage(),
+                'is_valid' => $f->isValid(),
+            ];
+        }
+
+        Log::info('AnnonceController@store execution', [
+            'has_images' => $request->hasFile('images'),
+            'files' => $filesInfo,
+            'upload_max_filesize' => ini_get('upload_max_filesize'),
+            'post_max_size' => ini_get('post_max_size'),
+            'upload_tmp_dir' => ini_get('upload_tmp_dir'),
+            'server_software' => $_SERVER['SERVER_SOFTWARE'] ?? 'N/A',
+        ]);
         $validated = $request->validate([
-            'type_offre' => 'required|string|in:vente,location',
-            'type_bien' => 'required|string|in:appartement,maison,villa,terrain,bureau,commerce,chambre,magasin,entrepot,autre',
+            'type_offre' => 'required|string|in:vente,location,court_sejour',
+            'type_bien' => 'required|string|in:appartement,maison,villa,terrain,bureau,commerce,chambre,magasin,entrepot,residence_meublee,chambre_hotel,auberge,autre',
             'titre' => 'required|string|max:255',
             'description' => 'required|string|min:20',
             'prix' => 'required|numeric|min:0',
             'date_disponibilite' => 'required|date',
             'superficie' => 'nullable|numeric|min:0',
+            'capacite_voyageurs' => 'nullable|integer|min:0|max:100',
             'nombre_chambres' => 'nullable|integer|min:0',
             'nombre_salles_bain' => 'nullable|integer|min:0',
             'nombre_pieces' => 'nullable|integer|min:0',
@@ -94,7 +152,24 @@ class AnnonceController extends Controller
             'equipements' => 'nullable|array',
             'equipements.*' => 'string',
             'images' => 'nullable|array|max:10',
-            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:5120',
+            'images.*' => 'image|mimes:jpg,jpeg,png,webp,jfif,avif|max:10240',
+        ], [
+            'type_offre.required' => 'Veuillez sélectionner le type d\'offre (location ou vente).',
+            'type_bien.required' => 'Veuillez sélectionner le type de bien.',
+            'titre.required' => 'Le titre de l\'annonce est obligatoire.',
+            'description.required' => 'La description du bien est obligatoire.',
+            'description.min' => 'La description doit contenir au moins 20 caractères.',
+            'prix.required' => 'Le prix est obligatoire.',
+            'prix.numeric' => 'Le prix doit être un nombre valide.',
+            'date_disponibilite.required' => 'La date de disponibilité est obligatoire.',
+            'quartier.required' => 'Le quartier est obligatoire.',
+            'adresse.required' => 'L\'adresse ou le repère est obligatoire.',
+            'images.max' => 'Vous ne pouvez pas envoyer plus de 10 photos.',
+            'images.uploaded' => 'Une ou plusieurs photos n\'ont pas pu être envoyées (taille maximale de 10 Mo dépassée).',
+            'images.*.image' => 'Chaque fichier doit être une image valide.',
+            'images.*.mimes' => 'Formats acceptés : JPG, JPEG, PNG, WEBP, JFIF, AVIF.',
+            'images.*.max' => 'La taille maximale par photo est de 10 Mo.',
+            'images.*.uploaded' => 'La photo n\'a pas pu être envoyée.',
         ]);
 
         // Upload des images
@@ -118,6 +193,7 @@ class AnnonceController extends Controller
     // SHOW — Détail
     public function show(Annonce $annonce)
     {
+        $annonce->incrementQuietly('vues');
         $annonce->load('user');
 
         $similaires = Annonce::where('id', '!=', $annonce->id)
@@ -137,7 +213,8 @@ class AnnonceController extends Controller
     // EDIT
     public function edit(Annonce $annonce)
     {
-        if ($annonce->id_user !== Auth::id()) {
+        $user = Auth::user();
+        if (! $user->peutPublierAnnonce() || ($annonce->id_user !== $user->id && ! $user->estAdmin())) {
             abort(403, 'Vous ne pouvez modifier que vos propres annonces.');
         }
 
@@ -147,22 +224,24 @@ class AnnonceController extends Controller
     // UPDATE
     public function update(Request $request, Annonce $annonce)
     {
-        if ($annonce->id_user !== Auth::id()) {
-            abort(403);
+        $user = Auth::user();
+        if (! $user->peutPublierAnnonce() || ($annonce->id_user !== $user->id && ! $user->estAdmin())) {
+            abort(403, 'Accès non autorisé.');
         }
 
         $validated = $request->validate([
             // ── Informations ──
             'titre' => 'required|string|max:255',
             'description' => 'required|string|min:20',
-            'type_bien' => 'required|string|in:appartement,maison,villa,terrain,bureau,commerce,chambre,magasin,entrepot,autre',
-            'type_offre' => 'required|string|in:vente,location',
+            'type_bien' => 'required|string|in:appartement,maison,villa,terrain,bureau,commerce,chambre,magasin,entrepot,residence_meublee,chambre_hotel,auberge,autre',
+            'type_offre' => 'required|string|in:vente,location,court_sejour',
             'statut' => 'required|in:active,vendu,loue,inactive',
 
             // ── Caractéristiques ──
             'prix' => 'required|numeric|min:0',
             'date_disponibilite' => 'nullable|date',
             'superficie' => 'nullable|numeric|min:0',
+            'capacite_voyageurs' => 'nullable|integer|min:0|max:100',
             'nombre_pieces' => 'nullable|integer|min:0',
             'nombre_chambres' => 'nullable|integer|min:0',
             'nombre_salles_bain' => 'nullable|integer|min:0',
@@ -175,7 +254,14 @@ class AnnonceController extends Controller
             'equipements' => 'nullable|array',
             'equipements.*' => 'string',
             'images' => 'nullable|array|max:10',
-            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:5120',
+            'images.*' => 'image|mimes:jpg,jpeg,png,webp,jfif,avif|max:10240',
+        ], [
+            'images.max' => 'Vous ne pouvez pas envoyer plus de 10 photos.',
+            'images.uploaded' => 'Une ou plusieurs photos n\'ont pas pu être envoyées (taille maximale de 10 Mo dépassée).',
+            'images.*.image' => 'Chaque fichier doit être une image valide.',
+            'images.*.mimes' => 'Formats acceptés : JPG, JPEG, PNG, WEBP, JFIF, AVIF.',
+            'images.*.max' => 'La taille maximale par photo est de 10 Mo.',
+            'images.*.uploaded' => 'La photo n\'a pas pu être envoyée. Le fichier dépasse la taille maximale autorisée de 10 Mo.',
         ]);
 
         // categorie reste alignée sur type_offre, comme dans store()
@@ -201,6 +287,12 @@ class AnnonceController extends Controller
 
         $annonce->update($validated);
 
+        if ($user->estAdmin() && ! $request->is('mes-annonces/*')) {
+            return redirect()
+                ->route('admin.biens.index')
+                ->with('success', 'Annonce mise à jour avec succès !');
+        }
+
         return redirect()
             ->route('annonces.mes-annonces')
             ->with('success', 'Annonce mise à jour avec succès !');
@@ -209,8 +301,9 @@ class AnnonceController extends Controller
     // DELETE
     public function destroy(Annonce $annonce)
     {
-        if ($annonce->id_user !== Auth::id()) {
-            abort(403);
+        $user = Auth::user();
+        if (! $user->peutPublierAnnonce() || ($annonce->id_user !== $user->id && ! $user->estAdmin())) {
+            abort(403, 'Accès non autorisé.');
         }
 
         if ($annonce->images) {
@@ -220,6 +313,12 @@ class AnnonceController extends Controller
         }
 
         $annonce->delete();
+
+        if ($user->estAdmin()) {
+            return redirect()
+                ->route('admin.biens.index')
+                ->with('success', 'Annonce supprimée avec succès.');
+        }
 
         return redirect()
             ->route('annonces.mes-annonces')

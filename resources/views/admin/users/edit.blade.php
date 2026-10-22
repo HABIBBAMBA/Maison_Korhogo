@@ -6,24 +6,24 @@
 
 <style>
     :root {
-        --edit-bg: #f0f4f8;
+        --edit-bg: #F8F9FA;
         --edit-card: #ffffff;
-        --edit-input-bg: #f7f9fb;
-        --edit-border: #dce3ea;
-        --edit-border-focus: #2a7d7f;
-        --edit-primary: #1b3a4f;
-        --edit-teal: #2a7d7f;
-        --edit-teal-light: #5db8b5;
-        --edit-teal-muted: rgba(42, 125, 127, 0.08);
-        --edit-primary-muted: rgba(27, 58, 79, 0.07);
+        --edit-input-bg: #F8F9FA;
+        --edit-border: #DCE1E7;
+        --edit-border-focus: #1B3A5C;
+        --edit-primary: #1B3A5C;
+        --edit-teal: #5A6B7B;
+        --edit-teal-light: #5A6B7B;
+        --edit-teal-muted: rgba(90, 107, 123, 0.08);
+        --edit-primary-muted: rgba(27, 58, 92, 0.08);
         --edit-green: #16a34a;
         --edit-green-muted: rgba(22, 163, 74, 0.08);
         --edit-red: #dc2626;
         --edit-red-muted: rgba(220, 38, 38, 0.06);
-        --edit-orange: #ea580c;
-        --edit-text: #1a2332;
-        --edit-text-secondary: #475569;
-        --edit-text-muted: #94a3b8;
+        --edit-orange: #E8734A;
+        --edit-text: #222831;
+        --edit-text-secondary: #5A6B7B;
+        --edit-text-muted: #5A6B7B;
         --edit-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
         --edit-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.07);
         --edit-radius: 16px;
@@ -73,7 +73,8 @@
 
     /* ===== HERO BANNER ===== */
     .edit-hero {
-        background: linear-gradient(135deg, var(--edit-primary) 0%, #2a5a6d 60%, var(--edit-teal) 100%);
+        background: var(--edit-primary);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: var(--edit-radius);
         padding: 2rem 2.25rem;
         margin-bottom: 1.5rem;
@@ -116,7 +117,8 @@
         width: 68px;
         height: 68px;
         border-radius: 18px;
-        background: linear-gradient(135deg, var(--edit-teal-light), var(--edit-teal));
+        background: var(--edit-teal);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -470,9 +472,10 @@
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, var(--edit-primary), #2a5a6d);
+        background: var(--edit-primary);
+        border: 1px solid var(--edit-primary);
         color: #ffffff;
-        box-shadow: 0 2px 8px rgba(27, 58, 79, 0.25);
+        box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.15), 0 2px 8px rgba(27, 58, 79, 0.25);
     }
 
     .btn-primary:hover {
@@ -505,7 +508,8 @@
 
     .danger-zone {
         padding: 1.5rem 2rem;
-        background: linear-gradient(180deg, rgba(220, 38, 38, 0.02) 0%, rgba(220, 38, 38, 0.05) 100%);
+        background: rgba(220, 38, 38, 0.03);
+        border-top: 1px solid rgba(220, 38, 38, 0.12);
     }
 
     .danger-zone-header {
@@ -926,7 +930,10 @@
                     <p>La suppression est irréversible et efface toutes les données.</p>
                 </div>
                 <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
-                    onsubmit="return confirm('Supprimer cet utilisateur ? Cette action est irréversible.')">
+                    data-confirm="Supprimer le compte de « {{ $user->name }} » ? Cette action est irréversible et effacera toutes les données."
+                    data-confirm-title="Supprimer définitivement l'utilisateur"
+                    data-confirm-btn="Supprimer le compte"
+                    data-confirm-warning="Cette action entraînera la suppression immédiate de tous les enregistrements liés à cet utilisateur.">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn-danger-outline">

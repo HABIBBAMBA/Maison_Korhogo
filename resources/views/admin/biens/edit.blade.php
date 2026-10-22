@@ -13,7 +13,7 @@
         <i class="bi bi-pencil" style="color: var(--teal);"></i> Modifier — {{ $bien->titre }}
     </h1>
 
-    @if($errors->any())
+    @if(($errors ?? null) && $errors->any())
     <div style="background: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem; font-size: 0.9rem;">
         @foreach($errors->all() as $error)
         <div>{{ $error }}</div>
@@ -37,7 +37,7 @@
                 style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 0.9rem; outline: none;">
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
             <div>
                 <label style="display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: #666; margin-bottom: 0.4rem;">Type *</label>
                 <select name="type_bien" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 0.9rem; outline: none; background: white;">
@@ -46,6 +46,13 @@
                         {{ ucfirst($type) }}
                     </option>
                     @endforeach
+                </select>
+            </div>
+            <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: #666; margin-bottom: 0.4rem;">Offre *</label>
+                <select name="type_offre" required style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 0.9rem; outline: none; background: white;">
+                    <option value="vente" {{ old('type_offre', $bien->type_offre ?? 'vente') === 'vente' ? 'selected' : '' }}>Vente</option>
+                    <option value="location" {{ old('type_offre', $bien->type_offre ?? 'vente') === 'location' ? 'selected' : '' }}>Location</option>
                 </select>
             </div>
             <div>
@@ -59,8 +66,8 @@
                 </select>
             </div>
             <div>
-                <label style="display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: #666; margin-bottom: 0.4rem;">Prix (€) *</label>
-                <input type="number" name="prix" value="{{ old('prix', $bien->prix) }}" required step="0.01" min="0"
+                <label style="display: block; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: #666; margin-bottom: 0.4rem;">Prix (FCFA) *</label>
+                <input type="number" name="prix" value="{{ old('prix', $bien->prix) }}" required step="1" min="0"
                     style="width: 100%; padding: 0.75rem 1rem; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 0.9rem; outline: none;">
             </div>
         </div>
@@ -135,14 +142,23 @@
         </h3>
 
         <div style="margin-bottom: 1.5rem;">
+            @php
+            $existingPhotos = [];
+            if (!empty($bien->images) && is_array($bien->images)) {
+                $existingPhotos = $bien->images;
+            } elseif (isset($bien->photos) && $bien->photos) {
+                $existingPhotos = $bien->photos->pluck('photo')->toArray();
+            }
+            @endphp
+
             {{-- Photos existantes --}}
-            @if($bien->photos->count() > 0)
+            @if(count($existingPhotos) > 0)
             <div style="margin-bottom: 1rem;">
-                <p style="font-size: 0.8rem; color: #6b7280; margin-bottom: 0.5rem;">Photos actuelles :</p>
+                <p style="font-size: 0.8rem; color: #6b7280; margin-bottom: 0.5rem;">Photos actuelles ({{ count($existingPhotos) }}) :</p>
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.75rem;">
-                    @foreach($bien->photos as $photo)
+                    @foreach($existingPhotos as $photo)
                     <div style="position:relative; aspect-ratio:1; border-radius:8px; overflow:hidden; border:2px solid #e5e7eb;">
-                        <img src="{{ asset('storage/' . $photo->photo) }}" alt="Photo" style="width:100%; height:100%; object-fit:cover;">
+                        <img src="{{ asset('storage/' . $photo) }}" alt="Photo" style="width:100%; height:100%; object-fit:cover;">
                     </div>
                     @endforeach
                 </div>
@@ -160,7 +176,7 @@
             ">
                 <i class="bi bi-cloud-arrow-up" style="font-size: 2rem; color: #9ca3af; display: block; margin-bottom: 0.5rem;"></i>
                 <p style="font-weight: 600; font-size: 0.9rem; color: #6b7280; margin-bottom: 0.25rem;">Cliquez ou glissez vos photos ici</p>
-                <p style="font-size: 0.8rem; color: #9ca3af;">JPG, PNG, WEBP — 5 Mo max par photo</p>
+                <p style="font-size: 0.8rem; color: #9ca3af;">JPG, PNG, WEBP — 10 Mo max par photo</p>
                 <input type="file" name="photos[]" id="photoInput" multiple accept="image/jpeg,image/png,image/webp" style="
                     position: absolute; inset: 0; opacity: 0; cursor: pointer;
                 ">

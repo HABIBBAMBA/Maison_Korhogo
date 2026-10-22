@@ -1,738 +1,1017 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="Connexion à votre espace ImmoPro — Plateforme immobilière de référence à Korhogo et en Côte d'Ivoire.">
     <title>Connexion — ImmoPro</title>
 
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23284b63'/%3E%3Cpath d='M8 24V12l8-5.5L24 12v12' stroke='white' stroke-width='2.2' fill='none'/%3E%3Crect x='13' y='17' width='6' height='7' rx='1' fill='white' opacity='.9'/%3E%3Ccircle cx='16' cy='13' r='2' fill='white' opacity='.6'/%3E%3C/svg%3E">
+    <!-- Favicon SVG solide (Zéro Dégradé) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231B3A5C'/%3E%3Cpath d='M8 23V12.5L16 6.5l8 6V23' stroke='white' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Crect x='13' y='16' width='6' height='7' rx='1' fill='%235A6B7B'/%3E%3Ccircle cx='16' cy='12' r='2' fill='%23E8734A'/%3E%3C/svg%3E">
 
+    <!-- Typographie Modulaire : Plus Jakarta Sans (Corps/UI), Playfair Display (Titres/Éditorial), JetBrains Mono (Données tabulaires) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
-        /* ═══════════════════════════════════════════
-           VARIABLES
-           ═══════════════════════════════════════════ */
+        /* ╔══════════════════════════════════════════════════════════════════════╗
+           ║  TOKENS SÉMANTIQUES & SURFACES MATÉRIELLES — STANDARD SKILL_DESIGN   ║
+           ║  POLITIQUE STRICTE ZÉRO DÉGRADÉ (NO-GRADIENT MANDATE)                ║
+           ╚══════════════════════════════════════════════════════════════════════╝ */
         :root {
-            --primary: #284b63;
-            --primary-light: #3a6a8a;
-            --primary-dark: #1a3447;
-            --primary-rgb: 40, 75, 99;
-            --teal: #3c6e71;
-            --teal-light: #4f8a8e;
-            --teal-rgb: 60, 110, 113;
-            --gold: #c9a84c;
-            --gold-light: #e4c76e;
-            --dark: #1a1a2e;
-            --gray-900: #2d2d3f;
-            --gray-700: #4a4a5c;
-            --gray-500: #7a7a8c;
-            --gray-300: #c4c4d0;
-            --gray-100: #f0f0f5;
-            --white: #ffffff;
-            --bg: #f7f8fc;
-            --success: #22c55e;
-            --danger: #ef4444;
-            --radius: 14px;
-            --radius-sm: 10px;
+            /* Surfaces physiques solides (4 étages de luminance) */
+            --surface-sunken: #F8F9FA;
+            --surface-base: #FFFFFF;
+            --surface-raised: #FFFFFF;
+            --surface-overlay: #FFFFFF;
+
+            /* Matériaux sombres solides (Architecture Bleu Marine) */
+            --surface-dark-sunken: #0E1F32;
+            --surface-dark-base: #1B3A5C;
+            --surface-dark-raised: #244C78;
+            --surface-dark-card: #152E4A;
+
+            /* Bordures structurelles Hairline (1px solide) */
+            --border-subtle: #E8ECF0;
+            --border-default: #DCE1E7;
+            --border-strong: #BAC3CD;
+            --border-dark: #2B527E;
+            --border-dark-subtle: #1F3F64;
+
+            /* Typographie & Contraste matériel */
+            --text-primary: #182230;
+            --text-secondary: #475467;
+            --text-muted: #667085;
+            --text-inverse: #F8F9FA;
+            --text-inverse-muted: #B4C4D4;
+
+            /* Accents & Identité Visuelle solide */
+            --primary: #1B3A5C;
+            --primary-hover: #132A43;
+            --secondary: #5A6B7B;
+            --secondary-hover: #475562;
+            --accent-cta: #E8734A;
+            --accent-cta-hover: #D55F35;
+            --accent-cta-active: #BF5129;
+
+            /* États Sémantiques solides */
+            --status-success-bg: #EBF8F2;
+            --status-success-text: #196C45;
+            --status-success-border: #A3E3C1;
+
+            --status-danger-bg: #FEF3F2;
+            --status-danger-text: #B42318;
+            --status-danger-border: #FECDCA;
+
+            --status-info-bg: #EFF6FF;
+            --status-info-text: #1E40AF;
+            --status-info-border: #BFDBFE;
+
+            /* Ombres Physiques Multicouches (sans diffusion artificielle) */
+            --shadow-raised:
+                0 1px 2px -1px rgba(24, 34, 48, 0.06),
+                0 1px 3px 0 rgba(24, 34, 48, 0.04);
+            --shadow-card:
+                0 2px 4px -1px rgba(24, 34, 48, 0.05),
+                0 8px 18px -3px rgba(24, 34, 48, 0.07);
+            --shadow-overlay:
+                0 6px 12px -2px rgba(24, 34, 48, 0.06),
+                0 16px 32px -4px rgba(24, 34, 48, 0.1);
+
+            /* Rayons de courbure concentriques */
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
             --radius-full: 9999px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+
+            /* Timing physique calibré (Spring ease-out-expo) */
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+            --duration-fast: 140ms;
+            --duration-normal: 220ms;
         }
 
         /* ═══════════════════════════════════════════
-           RESET
+           RESET & GLOBALS
            ═══════════════════════════════════════════ */
-        *,
-        *::before,
-        *::after {
+        *, *::before, *::after {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
         }
 
-        html {
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+        html, body {
+            height: 100%;
         }
 
         body {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            background: var(--bg);
-            color: var(--dark);
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 0.9375rem;
+            line-height: 1.5;
+            color: var(--text-primary);
+            background-color: var(--surface-sunken);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            overflow-x: hidden;
         }
 
         a {
-            text-decoration: none;
             color: inherit;
-            transition: var(--transition);
+            text-decoration: none;
+            transition: color var(--duration-fast) var(--ease-out), opacity var(--duration-fast) var(--ease-out);
         }
 
-        ::selection {
-            background: rgba(60, 110, 113, 0.15);
+        button, input {
+            font-family: inherit;
+            color: inherit;
+        }
+
+        .tabular-nums {
+            font-variant-numeric: tabular-nums;
+            font-family: 'JetBrains Mono', 'Plus Jakarta Sans', monospace;
         }
 
         /* ═══════════════════════════════════════════
-           LEFT PANEL — BRANDED
+           LAYOUT PRINCIPAL : SPLIT VIEW
            ═══════════════════════════════════════════ */
-        .left-panel {
+        .auth-split-wrapper {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        /* ── Panneau Gauche : Showcase Architectural ── */
+        .auth-showcase-panel {
             flex: 0 0 45%;
             position: relative;
+            background-color: var(--surface-dark-base);
+            border-inline-end: 1px solid var(--border-dark);
+            color: var(--text-inverse);
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 3rem;
+            justify-content: space-between;
+            padding: clamp(2rem, 4vw, 3.5rem);
             overflow: hidden;
-            background: linear-gradient(160deg, #1a3447 0%, #284b63 40%, #3c6e71 100%);
         }
 
-        /* Grain texture */
-        .left-panel::before {
-            content: '';
+        /* Arrière-plan architectural géométrique solide (Zéro Dégradé) */
+        .showcase-grid-overlay {
             position: absolute;
             inset: 0;
-            opacity: 0.035;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-            background-size: 128px 128px;
             pointer-events: none;
+            background-size: 32px 32px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' fill='none'%3E%3Cpath d='M32 0v32M0 32h32' stroke='%23FFFFFF' stroke-width='1' opacity='0.08'/%3E%3C/svg%3E");
         }
 
-        /* Grid pattern */
-        .left-panel::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-            pointer-events: none;
-        }
-
-        .deco-circle {
-            position: absolute;
-            border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            pointer-events: none;
-        }
-
-        .deco-circle.c1 {
-            width: 500px;
-            height: 500px;
-            top: -180px;
-            right: -120px;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.02), transparent 70%);
-        }
-
-        .deco-circle.c2 {
-            width: 350px;
-            height: 350px;
-            bottom: -100px;
-            left: -80px;
-        }
-
-        .deco-circle.c3 {
-            width: 180px;
-            height: 180px;
-            top: 20%;
-            left: 10%;
-            border-color: rgba(255, 255, 255, 0.04);
-        }
-
-        .left-content {
+        .showcase-header {
             position: relative;
             z-index: 2;
-            text-align: center;
-            max-width: 420px;
         }
 
-        .left-logo {
-            display: flex;
+        .showcase-brand {
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            gap: 0.7rem;
-            margin-bottom: 3rem;
+            gap: 0.75rem;
         }
 
-        .left-logo svg {
+        .brand-monogram {
             width: 44px;
             height: 44px;
-        }
-
-        .left-logo span {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: var(--white);
-        }
-
-        .left-logo span em {
-            font-style: normal;
-            color: var(--gold-light);
-        }
-
-        .left-visual {
-            width: 90px;
-            height: 90px;
-            margin: 0 auto 2rem;
-            border-radius: 24px;
-            background: rgba(255, 255, 255, 0.07);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            border-radius: var(--radius-md);
+            background-color: var(--surface-dark-raised);
+            border: 1px solid var(--border-dark);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.15), var(--shadow-raised);
             display: flex;
             align-items: center;
             justify-content: center;
-            animation: floatIcon 6s ease-in-out infinite;
+            color: #FFFFFF;
+            font-size: 1.25rem;
+            flex-shrink: 0;
         }
 
-        @keyframes floatIcon {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-8px);
-            }
-        }
-
-        .left-visual svg {
-            width: 40px;
-            height: 40px;
-        }
-
-        .left-content h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.3rem;
-            font-weight: 700;
-            color: var(--white);
-            margin-bottom: 0.75rem;
-            line-height: 1.2;
-        }
-
-        .left-content h1 em {
-            font-style: italic;
-            color: var(--gold-light);
-        }
-
-        .left-content p {
-            color: rgba(255, 255, 255, 0.55);
-            font-size: 0.95rem;
-            line-height: 1.8;
-            font-weight: 400;
-        }
-
-        /* Stats row */
-        .stats-row {
+        .brand-title-group {
             display: flex;
-            justify-content: center;
-            gap: 2.5rem;
-            margin-top: 3rem;
-            padding-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            flex-direction: column;
         }
 
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-item .stat-number {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
+        .brand-logo-text {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.625rem;
             font-weight: 700;
-            color: var(--white);
-            display: block;
+            letter-spacing: -0.01em;
+            color: #FFFFFF;
+            line-height: 1.1;
         }
 
-        .stat-item .stat-label {
-            font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            color: rgba(255, 255, 255, 0.35);
-            margin-top: 0.25rem;
-            display: block;
+        .brand-logo-text em {
+            font-style: normal;
+            color: var(--accent-cta);
+        }
+
+        .brand-subtitle-tag {
+            font-size: 0.6875rem;
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-inverse-muted);
+            margin-top: 0.2rem;
         }
 
-        /* ═══════════════════════════════════════════
-           RIGHT PANEL — FORM
-           ═══════════════════════════════════════════ */
-        .right-panel {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2.5rem;
-            background: var(--white);
+        /* Contenu central du showcase */
+        .showcase-body {
             position: relative;
+            z-index: 2;
+            margin-block: 2.5rem;
+            max-width: 480px;
         }
 
-        .form-container {
-            width: 100%;
-            max-width: 440px;
-            animation: formEnter 0.6s ease both;
-        }
-
-        @keyframes formEnter {
-            from {
-                opacity: 0;
-                transform: translateY(12px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Header */
-        .form-header {
-            margin-bottom: 2.2rem;
-        }
-
-        .mobile-brand {
-            display: none;
+        .showcase-pill {
+            display: inline-flex;
             align-items: center;
-            gap: 0.55rem;
-            margin-bottom: 2rem;
+            gap: 0.5rem;
+            padding: 0.375rem 0.875rem;
+            background-color: var(--surface-dark-card);
+            border: 1px solid var(--border-dark);
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-inverse-muted);
+            letter-spacing: 0.04em;
+            margin-bottom: 1.5rem;
         }
 
-        .mobile-brand svg {
-            width: 34px;
-            height: 34px;
+        .showcase-pill i {
+            color: var(--accent-cta);
         }
 
-        .mobile-brand span {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.3rem;
+        .showcase-heading {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(2rem, 3vw, 2.625rem);
             font-weight: 700;
-            color: var(--primary);
-        }
-
-        .mobile-brand span em {
-            font-style: normal;
-            color: var(--teal);
-        }
-
-        .form-header h2 {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: var(--dark);
-            margin-bottom: 0.5rem;
+            line-height: 1.2;
+            color: #FFFFFF;
+            margin-bottom: 1rem;
             letter-spacing: -0.02em;
         }
 
-        .form-header .subtitle {
-            color: var(--gray-500);
-            font-size: 0.9rem;
-            font-weight: 400;
+        .showcase-heading em {
+            font-style: italic;
+            color: var(--accent-cta);
         }
 
-        .form-header .subtitle a {
-            color: var(--teal);
-            font-weight: 600;
+        .showcase-description {
+            font-size: 0.9375rem;
+            line-height: 1.65;
+            color: var(--text-inverse-muted);
+            margin-bottom: 2rem;
         }
 
-        .form-header .subtitle a:hover {
-            color: var(--primary);
+        /* Carte d'illustration architecturale vectorielle (Zéro Dégradé) */
+        .showcase-blueprint-card {
+            background-color: var(--surface-dark-card);
+            border: 1px solid var(--border-dark);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08), var(--shadow-raised);
+            margin-bottom: 2rem;
         }
 
-        /* Alert / session messages */
-        .alert {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.75rem;
-            padding: 0.9rem 1.1rem;
-            border-radius: var(--radius-sm);
-            margin-bottom: 1.5rem;
-            font-size: 0.85rem;
-            font-weight: 500;
-            line-height: 1.5;
-            animation: slideDown 0.4s ease;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-8px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .alert svg {
-            flex-shrink: 0;
-            margin-top: 1px;
-        }
-
-        .alert-info {
-            background: #eff6ff;
-            color: #1e40af;
-            border: 1px solid #bfdbfe;
-        }
-
-        .alert-success {
-            background: #f0fdf4;
-            color: #166534;
-            border: 1px solid #bbf7d0;
-        }
-
-        .alert-error {
-            background: #fef2f2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
-        }
-
-        /* Social login */
-        .social-row {
-            display: flex;
-            gap: 0.75rem;
-            margin-bottom: 1.75rem;
-        }
-
-        .social-btn {
-            flex: 1;
+        .blueprint-header {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 0.75rem;
-            border: 1.5px solid var(--gray-100);
-            border-radius: var(--radius-sm);
-            background: var(--white);
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 0.82rem;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            font-size: 0.75rem;
+            color: var(--text-inverse-muted);
             font-weight: 600;
-            color: var(--gray-700);
-            transition: var(--transition);
-        }
-
-        .social-btn:hover {
-            border-color: var(--gray-300);
-            background: var(--gray-100);
-            transform: translateY(-1px);
-        }
-
-        .social-btn svg {
-            width: 18px;
-            height: 18px;
-        }
-
-        /* Divider */
-        .divider {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.75rem;
-        }
-
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--gray-100);
-        }
-
-        .divider span {
-            font-size: 0.78rem;
-            color: var(--gray-500);
-            font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.08em;
         }
 
-        /* Form groups */
-        .form-group {
-            margin-bottom: 1.3rem;
-        }
-
-        .form-label {
-            display: flex;
+        .blueprint-header .live-badge {
+            display: inline-flex;
             align-items: center;
-            justify-content: space-between;
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: var(--gray-700);
-            margin-bottom: 0.5rem;
+            gap: 0.375rem;
+            color: #4ADE80;
         }
 
-        .form-label a {
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: var(--teal);
+        .blueprint-header .live-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: #4ADE80;
         }
 
-        .form-label a:hover {
-            color: var(--primary);
-        }
-
-        .input-wrapper {
+        .blueprint-wireframe {
+            width: 100%;
+            height: 110px;
+            border: 1px dashed var(--border-dark);
+            border-radius: var(--radius-sm);
+            background-color: var(--surface-dark-sunken);
+            padding: 0.75rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 0.5rem;
             position: relative;
         }
 
-        .input-icon {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 18px;
-            height: 18px;
-            color: var(--gray-300);
-            transition: var(--transition-fast);
-            pointer-events: none;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 0.8rem 1rem 0.8rem 2.75rem;
-            border: 1.5px solid var(--gray-100);
-            border-radius: var(--radius-sm);
-            background: var(--bg);
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--dark);
-            outline: none;
-            transition: var(--transition);
-        }
-
-        .form-input::placeholder {
-            color: var(--gray-300);
-            font-weight: 400;
-        }
-
-        .form-input:hover {
-            border-color: var(--gray-300);
-        }
-
-        .form-input:focus {
-            border-color: var(--teal);
-            background: var(--white);
-            box-shadow: 0 0 0 4px rgba(60, 110, 113, 0.08);
-        }
-
-        .form-input:focus~.input-icon,
-        .input-wrapper:focus-within .input-icon {
-            color: var(--teal);
-        }
-
-        .form-input.error {
-            border-color: var(--danger);
-            background: #fffbfb;
-        }
-
-        .form-input.error:focus {
-            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.08);
-        }
-
-        .error-text {
+        .blueprint-room {
+            border: 1px solid var(--border-dark);
+            border-radius: 4px;
             display: flex;
             align-items: center;
-            gap: 0.35rem;
-            margin-top: 0.4rem;
-            font-size: 0.78rem;
-            font-weight: 500;
-            color: var(--danger);
+            justify-content: space-between;
+            padding: 0.5rem;
+            font-size: 0.6875rem;
+            color: var(--text-inverse-muted);
+            background-color: var(--surface-dark-card);
         }
 
-        .error-text svg {
-            width: 14px;
-            height: 14px;
+        .blueprint-room.master {
+            grid-row: span 2;
+        }
+
+        .blueprint-room-tag {
+            font-weight: 600;
+            color: #FFFFFF;
+        }
+
+        /* Métriques tabulaires certifiées */
+        .showcase-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-dark-subtle);
+        }
+
+        .showcase-stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.625rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-inverse-muted);
+            font-weight: 500;
+            margin-top: 0.25rem;
+        }
+
+        /* Pied du showcase */
+        .showcase-footer {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-inverse-muted);
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-dark-subtle);
+        }
+
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .security-badge i {
+            color: #4ADE80;
+        }
+
+        /* ── Panneau Droit : Formulaire Interactif ── */
+        .auth-form-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-color: var(--surface-sunken);
+            padding: clamp(1.5rem, 4vw, 3.5rem);
+            position: relative;
+        }
+
+        .auth-top-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 460px;
+            margin-inline: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        .nav-back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            padding: 0.5rem 0.875rem;
+            border-radius: var(--radius-sm);
+            background-color: var(--surface-base);
+            border: 1px solid var(--border-default);
+            box-shadow: var(--shadow-raised);
+            transition: background-color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out);
+        }
+
+        .nav-back-link:hover {
+            color: var(--text-primary);
+            border-color: var(--border-strong);
+            transform: translateY(-1px);
+        }
+
+        .nav-back-link:active {
+            transform: translateY(1px);
+        }
+
+        .nav-back-link:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--surface-sunken), 0 0 0 4px var(--primary);
+        }
+
+        .auth-card-container {
+            width: 100%;
+            max-width: 460px;
+            margin-inline: auto;
+            background-color: var(--surface-base);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            padding: clamp(1.75rem, 3.5vw, 2.5rem);
+            position: relative;
+        }
+
+        /* Marque mobile visible uniquement sur petits écrans */
+        .mobile-brand-header {
+            display: none;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.75rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .mobile-brand-header .brand-monogram {
+            width: 38px;
+            height: 38px;
+            font-size: 1.1rem;
+            background-color: var(--surface-dark-base);
+        }
+
+        .mobile-brand-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.375rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .mobile-brand-title em {
+            font-style: normal;
+            color: var(--accent-cta);
+        }
+
+        .form-headline-group {
+            margin-bottom: 1.75rem;
+        }
+
+        .form-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(1.5rem, 2.5vw, 1.875rem);
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            margin-bottom: 0.375rem;
+        }
+
+        .form-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .form-subtitle a {
+            color: var(--primary);
+            font-weight: 600;
+            border-bottom: 1px solid transparent;
+        }
+
+        .form-subtitle a:hover {
+            color: var(--accent-cta);
+            border-bottom-color: var(--accent-cta);
+        }
+
+        /* ── Alertes & Notifications d'état ── */
+        .alert-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.8125rem;
+            line-height: 1.45;
+            margin-bottom: 1.5rem;
+            border: 1px solid transparent;
+        }
+
+        .alert-box i {
+            font-size: 1rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .alert-box.info {
+            background-color: var(--status-info-bg);
+            border-color: var(--status-info-border);
+            color: var(--status-info-text);
+        }
+
+        .alert-box.success {
+            background-color: var(--status-success-bg);
+            border-color: var(--status-success-border);
+            color: var(--status-success-text);
+        }
+
+        .alert-box.error {
+            background-color: var(--status-danger-bg);
+            border-color: var(--status-danger-border);
+            color: var(--status-danger-text);
+        }
+
+        /* ── Bouton Social (Google OAuth) ── */
+        .social-auth-action {
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-social {
+            width: 100%;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            background-color: var(--surface-base);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            font-weight: 600;
+            box-shadow: var(--shadow-raised);
+            cursor: pointer;
+            transition: background-color var(--duration-fast) var(--ease-out),
+                        border-color var(--duration-fast) var(--ease-out),
+                        transform var(--duration-fast) var(--ease-out),
+                        box-shadow var(--duration-fast) var(--ease-out);
+        }
+
+        .btn-social:hover {
+            background-color: var(--surface-sunken);
+            border-color: var(--border-strong);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-card);
+        }
+
+        .btn-social:active {
+            transform: translateY(1px);
+            background-color: var(--border-subtle);
+        }
+
+        .btn-social:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--surface-base), 0 0 0 4px var(--primary);
+        }
+
+        .btn-social svg {
+            width: 18px;
+            height: 18px;
             flex-shrink: 0;
         }
 
-        /* Password toggle */
-        .pwd-toggle {
+        /* Séparateur horizontal 1px solide */
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background-color: var(--border-default);
+        }
+
+        .auth-divider span {
+            font-size: 0.6875rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+        }
+
+        /* ── Composants de Formulaire & 8 États ── */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .field-label-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.4375rem;
+        }
+
+        .field-label {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .field-label .required-mark {
+            color: var(--status-danger-text);
+        }
+
+        .forgot-link {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+
+        .forgot-link:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        .input-control-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-lead-icon {
             position: absolute;
-            right: 0.75rem;
-            top: 50%;
-            transform: translateY(-50%);
+            inset-inline-start: 0.875rem;
+            width: 18px;
+            height: 18px;
+            color: var(--text-muted);
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: color var(--duration-fast) var(--ease-out);
+        }
+
+        .form-input-text {
+            width: 100%;
+            height: 44px; /* Zone tactile 44px conforme accessibilité mobile */
+            padding-inline-start: 2.625rem;
+            padding-inline-end: 2.625rem;
+            font-size: 1rem; /* 16px strict pour prévenir l'auto-zoom iOS */
+            line-height: 1.5;
+            color: var(--text-primary);
+            background-color: var(--surface-base);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-sm);
+            box-shadow: inset 0 1px 1px 0 rgba(24, 34, 48, 0.03);
+            transition: border-color var(--duration-fast) var(--ease-out),
+                        box-shadow var(--duration-fast) var(--ease-out),
+                        background-color var(--duration-fast) var(--ease-out);
+        }
+
+        @media (min-width: 768px) {
+            .form-input-text {
+                font-size: 0.875rem;
+            }
+        }
+
+        .form-input-text::placeholder {
+            color: var(--text-muted);
+            opacity: 0.85;
+            font-weight: 400;
+        }
+
+        /* 8 États de l'Input */
+        .form-input-text:hover {
+            border-color: var(--border-strong);
+        }
+
+        .form-input-text:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: #FFFFFF;
+            box-shadow: 0 0 0 2px var(--surface-base), 0 0 0 4px rgba(27, 58, 92, 0.18);
+        }
+
+        .form-input-text:focus + .input-lead-icon,
+        .input-control-wrapper:focus-within .input-lead-icon {
+            color: var(--primary);
+        }
+
+        .form-input-text.has-error {
+            border-color: var(--status-danger-border);
+            background-color: var(--status-danger-bg);
+            color: var(--status-danger-text);
+        }
+
+        .form-input-text.has-error:focus {
+            border-color: var(--status-danger-text);
+            box-shadow: 0 0 0 2px var(--surface-base), 0 0 0 4px rgba(180, 35, 24, 0.15);
+        }
+
+        .form-input-text:disabled {
+            background-color: var(--surface-sunken);
+            border-color: var(--border-subtle);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            opacity: 0.55;
+        }
+
+        /* Bouton toggle mot de passe */
+        .btn-toggle-password {
+            position: absolute;
+            inset-inline-end: 0.5rem;
             width: 32px;
             height: 32px;
             border: none;
             background: transparent;
+            border-radius: var(--radius-sm);
+            color: var(--text-muted);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 8px;
-            color: var(--gray-300);
-            transition: var(--transition-fast);
+            font-size: 1rem;
+            transition: color var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out);
         }
 
-        .pwd-toggle:hover {
-            color: var(--gray-700);
-            background: var(--gray-100);
+        .btn-toggle-password:hover {
+            color: var(--text-primary);
+            background-color: var(--surface-sunken);
         }
 
-        .pwd-toggle svg {
-            width: 18px;
-            height: 18px;
+        .btn-toggle-password:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary);
         }
 
-        /* Checkbox row */
-        .checkbox-row {
+        /* Message d'erreur sous champ */
+        .field-error-message {
             display: flex;
             align-items: center;
-            margin-bottom: 1.75rem;
+            gap: 0.35rem;
+            margin-top: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--status-danger-text);
         }
 
-        .custom-checkbox {
+        .field-error-message i {
+            font-size: 0.8125rem;
+            flex-shrink: 0;
+        }
+
+        /* ── Checkbox personnalisée (Zéro Dégradé) ── */
+        .checkbox-container {
             display: flex;
             align-items: center;
-            gap: 0.55rem;
+            justify-content: space-between;
+            margin-block: 1.25rem 1.5rem;
+        }
+
+        .custom-checkbox-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.625rem;
             cursor: pointer;
-            font-size: 0.84rem;
-            color: var(--gray-700);
             user-select: none;
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
         }
 
-        .custom-checkbox input {
-            display: none;
+        .custom-checkbox-input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
         }
 
-        .check-mark {
+        .checkbox-box {
             width: 18px;
             height: 18px;
-            border: 1.5px solid var(--gray-300);
-            border-radius: 5px;
+            border-radius: 4px;
+            border: 1.5px solid var(--border-strong);
+            background-color: var(--surface-base);
             display: flex;
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            transition: var(--transition-fast);
+            transition: background-color var(--duration-fast) var(--ease-out),
+                        border-color var(--duration-fast) var(--ease-out),
+                        box-shadow var(--duration-fast) var(--ease-out);
         }
 
-        .check-mark svg {
-            width: 11px;
-            height: 11px;
+        .checkbox-box i {
+            color: #FFFFFF;
+            font-size: 0.6875rem;
             opacity: 0;
-            transform: scale(0.5);
-            transition: var(--transition-fast);
-            color: white;
+            transform: scale(0.6);
+            transition: opacity var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out);
         }
 
-        .custom-checkbox input:checked+.check-mark {
-            background: linear-gradient(135deg, var(--primary), var(--teal));
+        .custom-checkbox-input:checked + .checkbox-box {
+            background-color: var(--primary);
             border-color: var(--primary);
         }
 
-        .custom-checkbox input:checked+.check-mark svg {
+        .custom-checkbox-input:checked + .checkbox-box i {
             opacity: 1;
             transform: scale(1);
         }
 
-        /* Submit */
-        .btn-submit {
+        .custom-checkbox-input:focus-visible + .checkbox-box {
+            box-shadow: 0 0 0 2px var(--surface-base), 0 0 0 4px var(--primary);
+        }
+
+        /* ── Bouton Primaire CTA (Zéro Dégradé) ── */
+        .btn-submit-cta {
             width: 100%;
-            padding: 0.9rem;
-            border: none;
-            border-radius: var(--radius-full);
-            background: linear-gradient(135deg, var(--primary), var(--teal));
-            color: var(--white);
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: 0.92rem;
+            height: 48px;
+            border: 1px solid var(--accent-cta);
+            border-radius: var(--radius-sm);
+            background-color: var(--accent-cta);
+            color: #FFFFFF;
+            font-size: 0.9375rem;
             font-weight: 700;
+            letter-spacing: -0.01em;
             cursor: pointer;
-            transition: var(--transition);
-            box-shadow: 0 4px 16px rgba(var(--primary-rgb), 0.3);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.25), var(--shadow-raised);
+            transition: background-color var(--duration-fast) var(--ease-out),
+                        border-color var(--duration-fast) var(--ease-out),
+                        transform var(--duration-fast) var(--ease-out),
+                        box-shadow var(--duration-fast) var(--ease-out);
+            position: relative;
+        }
+
+        .btn-submit-cta:hover {
+            background-color: var(--accent-cta-hover);
+            border-color: var(--accent-cta-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-card);
+        }
+
+        .btn-submit-cta:active {
+            transform: translateY(1px);
+            background-color: var(--accent-cta-active);
+            border-color: var(--accent-cta-active);
+            box-shadow: inset 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-submit-cta:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--surface-base), 0 0 0 4px var(--accent-cta);
+        }
+
+        .btn-submit-cta i {
+            font-size: 1.1rem;
+            transition: transform var(--duration-fast) var(--ease-out);
+        }
+
+        .btn-submit-cta:hover i {
+            transform: translateX(3px);
+        }
+
+        /* État de chargement (Loading State) */
+        .btn-submit-cta.is-loading {
+            pointer-events: none;
+            opacity: 0.88;
+        }
+
+        .btn-submit-cta .spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            border-top-color: #FFFFFF;
+            border-radius: 50%;
+            animation: spin 600ms linear infinite;
+        }
+
+        .btn-submit-cta.is-loading .spinner {
+            display: inline-block;
+        }
+
+        .btn-submit-cta.is-loading .btn-text,
+        .btn-submit-cta.is-loading i {
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ── Pied de carte & Réassurance ── */
+        .card-reassurance-footer {
+            margin-top: 1.5rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid var(--border-subtle);
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            position: relative;
-            overflow: hidden;
         }
 
-        .btn-submit::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-            opacity: 0;
-            transition: var(--transition);
+        .card-reassurance-footer i {
+            color: var(--secondary);
         }
 
-        .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 28px rgba(var(--primary-rgb), 0.4);
+        .auth-footer-simple {
+            max-width: 460px;
+            margin-inline: auto;
+            margin-top: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
         }
 
-        .btn-submit:hover::before {
-            opacity: 1;
-        }
-
-        .btn-submit:active {
-            transform: translateY(0);
-        }
-
-        .btn-submit span,
-        .btn-submit svg {
-            position: relative;
-            z-index: 1;
-        }
-
-        .btn-submit svg {
-            transition: var(--transition);
-        }
-
-        .btn-submit:hover svg {
-            transform: translateX(3px);
+        .auth-footer-simple a:hover {
+            color: var(--text-primary);
         }
 
         /* ═══════════════════════════════════════════
-           RESPONSIVE
+           RESPONSIVE DESIGN (2X SPATIAL GRID)
            ═══════════════════════════════════════════ */
-        @media (max-width: 1024px) {
-            .left-panel {
-                flex: 0 0 40%;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-            }
-
-            .left-panel {
+        @media (max-width: 991px) {
+            .auth-showcase-panel {
                 display: none;
             }
 
-            .right-panel {
-                min-height: 100vh;
-                padding: 2rem 1.5rem;
+            .auth-form-panel {
+                padding: 1.5rem 1rem 2.5rem;
+                justify-content: flex-start;
             }
 
-            .mobile-brand {
+            .mobile-brand-header {
                 display: flex;
             }
 
-            .form-header {
-                margin-bottom: 1.8rem;
+            .auth-top-nav {
+                margin-bottom: 1rem;
             }
         }
 
         @media (max-width: 480px) {
-            .social-row {
-                flex-direction: column;
+            .auth-card-container {
+                padding: 1.25rem;
+                border-radius: var(--radius-md);
             }
 
-            .form-header h2 {
-                font-size: 1.5rem;
+            .form-title {
+                font-size: 1.375rem;
+            }
+
+            .btn-submit-cta {
+                height: 44px;
+                font-size: 0.875rem;
+            }
+        }
+
+        /* Respect strict de la préférence cinétique (a11y) */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
             }
         }
     </style>
@@ -740,276 +1019,359 @@
 
 <body>
 
-    <!-- ══════════════════════════════════════════
-         LEFT BRANDED PANEL
-         ══════════════════════════════════════════ -->
-    <div class="left-panel">
-        <div class="deco-circle c1"></div>
-        <div class="deco-circle c2"></div>
-        <div class="deco-circle c3"></div>
+    <div class="auth-split-wrapper">
 
-        <div class="left-content">
-            <div class="left-logo">
-                <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <rect width="44" height="44" rx="12" fill="rgba(255,255,255,0.1)" />
-                    <path d="M12 30V17l10-7 10 7v13" stroke="rgba(255,255,255,0.85)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-                    <rect x="17" y="22" width="10" height="8" rx="1.5" fill="rgba(255,255,255,0.7)" />
-                    <circle cx="22" cy="18.5" r="2.5" fill="rgba(255,255,255,0.4)" />
-                </svg>
-                <span>Immo<em>Pro</em></span>
+        <!-- ╔══════════════════════════════════════════════════════════════════════╗
+             ║  PANNEAU GAUCHE : SHOWCASE ARCHITECTURAL IMMOPRO (ZÉRO DÉGRADÉ)    ║
+             ╚══════════════════════════════════════════════════════════════════════╝ -->
+        <aside class="auth-showcase-panel" aria-label="Présentation ImmoPro">
+            <div class="showcase-grid-overlay" aria-hidden="true"></div>
+
+            <!-- En-tête de marque -->
+            <div class="showcase-header">
+                <a href="{{ route('home') }}" class="showcase-brand" title="Retour à l'accueil ImmoPro">
+                    <div class="brand-monogram" aria-hidden="true">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <div class="brand-title-group">
+                        <span class="brand-logo-text">Immo<em>Pro</em></span>
+                        <span class="brand-subtitle-tag">Côte d'Ivoire • Korhogo</span>
+                    </div>
+                </a>
             </div>
 
-            <div class="left-visual">
-                <svg viewBox="0 0 40 40" fill="none">
-                    <rect x="5" y="18" width="30" height="18" rx="3" stroke="rgba(255,255,255,0.7)" stroke-width="2" fill="none" />
-                    <path d="M20 4L5 18h30L20 4z" stroke="rgba(255,255,255,0.7)" stroke-width="2" fill="none" stroke-linejoin="round" />
-                    <rect x="16" y="26" width="8" height="10" rx="1.5" fill="rgba(255,255,255,0.3)" />
-                    <rect x="10" y="22" width="5" height="5" rx="1" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" fill="none" />
-                    <rect x="25" y="22" width="5" height="5" rx="1" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" fill="none" />
-                </svg>
-            </div>
-
-            <h1>Bon retour parmi <em>nous</em></h1>
-            <p>Accédez à votre espace personnel, gérez vos biens et suivez vos transactions immobilières en toute simplicité.</p>
-
-            <div class="stats-row">
-                <div class="stat-item">
-                    <span class="stat-number">2 500+</span>
-                    <span class="stat-label">Biens listés</span>
+            <!-- Corps éditorial & Carte vectorielle -->
+            <div class="showcase-body">
+                <div class="showcase-pill">
+                    <i class="bi bi-shield-check"></i>
+                    <span>Espace Membre Sécurisé</span>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-number">1 200+</span>
-                    <span class="stat-label">Clients actifs</span>
+
+                <h1 class="showcase-heading">
+                    L'immobilier de prestige en toute <em>confiance</em>.
+                </h1>
+
+                <p class="showcase-description">
+                    Accédez instantanément à vos annonces, vos requêtes de visites, vos contacts acheteurs et vos dossiers certifiés sur le portail de référence.
+                </p>
+
+                <!-- Carte d'illustration architecturale solide -->
+                <div class="showcase-blueprint-card" aria-hidden="true">
+                    <div class="blueprint-header">
+                        <span>Plan type • Villa Standing Korhogo</span>
+                        <span class="live-badge">Certifié</span>
+                    </div>
+                    <div class="blueprint-wireframe">
+                        <div class="blueprint-room master">
+                            <span class="blueprint-room-tag">Suite Parentale</span>
+                            <span class="tabular-nums">28 m²</span>
+                        </div>
+                        <div class="blueprint-room">
+                            <span class="blueprint-room-tag">Séjour</span>
+                            <span class="tabular-nums">42 m²</span>
+                        </div>
+                        <div class="blueprint-room">
+                            <span class="blueprint-room-tag">Terrasse</span>
+                            <span class="tabular-nums">16 m²</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat-item">
-                    <span class="stat-number">98%</span>
-                    <span class="stat-label">Satisfaction</span>
+
+                <!-- Statistiques tabulaires vérifiées -->
+                <div class="showcase-stats-grid">
+                    <div class="showcase-stat-item">
+                        <span class="stat-value tabular-nums">2 500+</span>
+                        <span class="stat-label">Biens répertoriés</span>
+                    </div>
+                    <div class="showcase-stat-item">
+                        <span class="stat-value tabular-nums">1 200+</span>
+                        <span class="stat-label">Propriétaires & Pros</span>
+                    </div>
+                    <div class="showcase-stat-item">
+                        <span class="stat-value tabular-nums">99.2%</span>
+                        <span class="stat-label">Transactions fiables</span>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- ══════════════════════════════════════════
-         RIGHT FORM PANEL
-         ══════════════════════════════════════════ -->
-    <div class="right-panel">
-        <div class="form-container">
+            <!-- Pied de page du showcase -->
+            <div class="showcase-footer">
+                <span class="security-badge">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Chiffrement SSL 256-bit • Données hébergées en sécurité
+                </span>
+                <span class="tabular-nums">v13.8</span>
+            </div>
+        </aside>
 
-            <!-- Mobile brand -->
-            <a href="{{ url('/') }}" class="mobile-brand">
-                <svg viewBox="0 0 36 36" fill="none">
-                    <rect width="36" height="36" rx="9" fill="url(#mGrad)" />
-                    <path d="M10 26V15l8-5.5 8 5.5v11" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-                    <rect x="14" y="19.5" width="8" height="6.5" rx="1.5" fill="#fff" opacity=".85" />
-                    <circle cx="18" cy="16" r="2" fill="#fff" opacity=".5" />
-                    <defs>
-                        <linearGradient id="mGrad" x1="0" y1="0" x2="36" y2="36">
-                            <stop stop-color="#284b63" />
-                            <stop offset="1" stop-color="#3c6e71" />
-                        </linearGradient>
-                    </defs>
-                </svg>
-                <span>Immo<em>Pro</em></span>
-            </a>
+        <!-- ╔══════════════════════════════════════════════════════════════════════╗
+             ║  PANNEAU DROIT : FORMULAIRE DE CONNEXION (8 ÉTATS STANDARD SENIOR) ║
+             ╚══════════════════════════════════════════════════════════════════════╝ -->
+        <main class="auth-form-panel">
 
-            <!-- Header -->
-            <div class="form-header">
-                <h2>Se connecter</h2>
-                <p class="subtitle">Pas encore de compte ? <a href="{{ route('register') }}">Créer un compte</a></p>
+            <!-- Navigation supérieure discrète -->
+            <div class="auth-top-nav">
+                <a href="{{ route('home') }}" class="nav-back-link" title="Retourner à la page d'accueil">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Retour au site</span>
+                </a>
+
+                <span class="form-subtitle">
+                    Pas de compte ?
+                    <a href="{{ route('register') }}" class="fw-semibold">S'inscrire</a>
+                </span>
             </div>
 
-            <!-- Session messages -->
-            @if (session('message'))
-            <div class="alert alert-info">
-                <svg viewBox="0 0 20 20" width="18" height="18" fill="none">
-                    <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.6" />
-                    <path d="M10 9v4M10 7h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-                </svg>
-                <span>{{ session('message') }}</span>
-            </div>
-            @endif
+            <!-- Carte principale du formulaire -->
+            <div class="auth-card-container">
 
-            @if (session('status'))
-            <div class="alert alert-success">
-                <svg viewBox="0 0 20 20" width="18" height="18" fill="none">
-                    <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.6" />
-                    <path d="M7 10l2 2 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-                <span>{{ session('status') }}</span>
-            </div>
-            @endif
+                <!-- Header de marque sur Mobile uniquement -->
+                <div class="mobile-brand-header">
+                    <div class="brand-monogram" aria-hidden="true">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <div>
+                        <div class="mobile-brand-title">Immo<em>Pro</em></div>
+                        <div style="font-size: 0.6875rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em;">Portail Immobilier Officiel</div>
+                    </div>
+                </div>
 
-            @if ($errors->any())
-            <div class="alert alert-error">
-                <svg viewBox="0 0 20 20" width="18" height="18" fill="none">
-                    <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.6" />
-                    <path d="M10 6.5v4M10 13h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-                </svg>
-                <span>{{ $errors->first() }}</span>
-            </div>
-            @endif
+                <!-- Titre & sous-titre de la vue -->
+                <div class="form-headline-group">
+                    <h2 class="form-title">Bon retour parmi nous</h2>
+                    <p class="form-subtitle">
+                        Renseignez vos identifiants pour accéder à votre espace de gestion.
+                    </p>
+                </div>
 
-            <!-- Social login -->
+                <!-- Alertes de session / messages -->
+                @if (session('message'))
+                    <div class="alert-box info" role="status">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <span>{{ session('message') }}</span>
+                    </div>
+                @endif
 
+                @if (session('status'))
+                    <div class="alert-box success" role="status">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>{{ session('status') }}</span>
+                    </div>
+                @endif
 
-            <div class="social-row">
-                <a href="{{ route('google.redirect') }}" class="social-btn">
-                    <button type="button" class="social-btn">
-                        <svg viewBox="0 0 18 18">
+                @if ($errors->any())
+                    <div class="alert-box error" role="alert" id="form-error-alert">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <span>{{ $errors->first() }}</span>
+                    </div>
+                @endif
+
+                <!-- Connexion avec Google OAuth -->
+                <div class="social-auth-action">
+                    <a href="{{ route('google.redirect') }}" class="btn-social" id="btnGoogleAuth" title="Se connecter rapidement avec votre compte Google">
+                        <svg viewBox="0 0 18 18" aria-hidden="true">
                             <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4" />
                             <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853" />
                             <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.997 8.997 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z" fill="#FBBC05" />
                             <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 2.58 9 3.58Z" fill="#EA4335" />
                         </svg>
-                        <span>Google</span>
+                        <span>Continuer avec Google</span>
+                    </a>
+                </div>
+
+                <!-- Séparateur solide 1px -->
+                <div class="auth-divider" aria-hidden="true">
+                    <span>ou par email</span>
+                </div>
+
+                <!-- Formulaire principal POST /login -->
+                <form method="POST" action="{{ route('login') }}" id="loginForm" novalidate>
+                    @csrf
+
+                    <!-- Champ 1 : Adresse Email -->
+                    <div class="form-group">
+                        <div class="field-label-row">
+                            <label for="email" class="field-label">
+                                <span>Adresse email</span>
+                                <span class="required-mark" aria-hidden="true">*</span>
+                            </label>
+                        </div>
+
+                        <div class="input-control-wrapper">
+                            <span class="input-lead-icon" aria-hidden="true">
+                                <i class="bi bi-envelope"></i>
+                            </span>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                class="form-input-text {{ $errors->has('email') ? 'has-error' : '' }}"
+                                placeholder="exemple@domaine.ci"
+                                value="{{ old('email') }}"
+                                required
+                                autocomplete="email"
+                                autofocus
+                                aria-required="true"
+                                aria-invalid="{{ $errors->has('email') ? 'true' : 'false' }}"
+                                @if ($errors->has('email')) aria-describedby="email-error" @endif>
+                        </div>
+
+                        @error('email')
+                            <div class="field-error-message" id="email-error" role="alert">
+                                <i class="bi bi-exclamation-circle-fill"></i>
+                                <span>{{ $message }}</span>
+                            </div>
+                        @enderror
+                    </div>
+
+                    <!-- Champ 2 : Mot de passe -->
+                    <div class="form-group">
+                        <div class="field-label-row">
+                            <label for="password" class="field-label">
+                                <span>Mot de passe</span>
+                                <span class="required-mark" aria-hidden="true">*</span>
+                            </label>
+
+                            @if (Route::has('password.request'))
+                                <a href="{{ route('password.request') }}" class="forgot-link">
+                                    Mot de passe oublié ?
+                                </a>
+                            @endif
+                        </div>
+
+                        <div class="input-control-wrapper">
+                            <span class="input-lead-icon" aria-hidden="true">
+                                <i class="bi bi-lock"></i>
+                            </span>
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                class="form-input-text {{ $errors->has('password') ? 'has-error' : '' }}"
+                                placeholder="••••••••••••"
+                                required
+                                autocomplete="current-password"
+                                aria-required="true"
+                                aria-invalid="{{ $errors->has('password') ? 'true' : 'false' }}"
+                                @if ($errors->has('password')) aria-describedby="password-error" @endif>
+
+                            <button
+                                type="button"
+                                class="btn-toggle-password"
+                                id="btnTogglePassword"
+                                aria-label="Afficher ou masquer le mot de passe"
+                                aria-pressed="false">
+                                <i class="bi bi-eye" id="eyeIcon"></i>
+                            </button>
+                        </div>
+
+                        @error('password')
+                            <div class="field-error-message" id="password-error" role="alert">
+                                <i class="bi bi-exclamation-circle-fill"></i>
+                                <span>{{ $message }}</span>
+                            </div>
+                        @enderror
+                    </div>
+
+                    <!-- Options : Se souvenir de moi -->
+                    <div class="checkbox-container">
+                        <label class="custom-checkbox-label">
+                            <input
+                                type="checkbox"
+                                name="remember"
+                                id="remember"
+                                class="custom-checkbox-input"
+                                {{ old('remember') ? 'checked' : '' }}>
+                            <span class="checkbox-box" aria-hidden="true">
+                                <i class="bi bi-check-lg"></i>
+                            </span>
+                            <span>Se souvenir de moi pendant 30 jours</span>
+                        </label>
+                    </div>
+
+                    <!-- Bouton de Soumission Principal -->
+                    <button type="submit" class="btn-submit-cta" id="btnSubmitLogin">
+                        <span class="spinner" aria-hidden="true"></span>
+                        <span class="btn-text">Accéder à mon espace</span>
+                        <i class="bi bi-arrow-right" aria-hidden="true"></i>
                     </button>
-                </a>
-                <a href="" class="social-btn">
-                    <svg viewBox="0 0 18 18" fill="none">
-                        <path d="M15 1H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h6v-6.5H6.5V10H9V8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2 .1 2.3.1v2.5h-1.6c-1.2 0-1.5.6-1.5 1.5v1.8h2.8l-.4 2.5H13V17h2a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2Z" fill="#1877F2" />
-                    </svg>
-                    <span>Facebook</span>
-                </a>
+                </form>
 
+                <!-- Réassurance de bas de carte -->
+                <div class="card-reassurance-footer">
+                    <i class="bi bi-shield-lock-fill"></i>
+                    <span>Connexion chiffrée SSL • Vos informations personnelles sont protégées</span>
+                </div>
             </div>
 
-            <!-- Divider -->
-            <div class="divider">
-                <span>ou avec votre email</span>
-            </div>
-
-            <!-- Form -->
-            <form method="POST" action="{{ route('login') }}" id="loginForm">
-                @csrf
-
-                <!-- Email -->
-                <div class="form-group">
-                    <label class="form-label" for="email">Adresse email</label>
-                    <div class="input-wrapper">
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            class="form-input {{ $errors->has('email') ? 'error' : '' }}"
-                            placeholder="votreemail@exemple.com"
-                            value="{{ old('email') }}"
-                            autocomplete="email"
-                            autofocus>
-                        <svg class="input-icon" viewBox="0 0 20 20" fill="none">
-                            <rect x="2" y="4" width="16" height="12" rx="2.5" stroke="currentColor" stroke-width="1.6" />
-                            <path d="m2.5 5 7 5.5 7-5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </div>
-                    @error('email')
-                    <div class="error-text">
-                        <svg viewBox="0 0 16 16" fill="none">
-                            <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4" />
-                            <path d="M8 5v3.5M8 10.5h.01" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
-                        </svg>
-                        {{ $message }}
-                    </div>
-                    @enderror
+            <!-- Footer discret & légal -->
+            <footer class="auth-footer-simple">
+                <span>&copy; {{ date('Y') }} ImmoPro Côte d'Ivoire</span>
+                <div style="display: flex; gap: 1rem;">
+                    <a href="{{ route('home') }}">Accueil</a>
+                    <a href="{{ route('contact') }}">Assistance</a>
                 </div>
-
-                <!-- Password -->
-                <div class="form-group">
-                    <label class="form-label" for="password">
-                        Mot de passe
-                        @if (Route::has('password.request'))
-                        <a href="{{ route('password.request') }}">Mot de passe oublié ?</a>
-                        @endif
-                    </label>
-                    <div class="input-wrapper">
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            class="form-input {{ $errors->has('password') ? 'error' : '' }}"
-                            placeholder="Votre mot de passe"
-                            autocomplete="current-password">
-                        <svg class="input-icon" viewBox="0 0 20 20" fill="none">
-                            <rect x="4" y="9" width="12" height="8" rx="2.5" stroke="currentColor" stroke-width="1.6" />
-                            <path d="M7 9V6.5a3 3 0 1 1 6 0V9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
-                            <circle cx="10" cy="13" r="1.2" fill="currentColor" />
-                        </svg>
-                        <button type="button" class="pwd-toggle" onclick="togglePassword()" aria-label="Afficher le mot de passe">
-                            <svg viewBox="0 0 20 20" fill="none" id="eyeOpen">
-                                <path d="M1.5 10S4.5 4 10 4s8.5 6 8.5 6-3 6-8.5 6S1.5 10 1.5 10Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                <circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.5" />
-                            </svg>
-                            <svg viewBox="0 0 20 20" fill="none" id="eyeClosed" style="display:none">
-                                <path d="M2.5 2.5l15 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                <path d="M8.5 7.5a3 3 0 0 0 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                <path d="M1.5 10S4.5 4 10 4c1.5 0 2.8.4 4 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                                <path d="M18.5 10S15.5 16 10 16c-1.5 0-2.8-.4-4-1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-                            </svg>
-                        </button>
-                    </div>
-                    @error('password')
-                    <div class="error-text">
-                        <svg viewBox="0 0 16 16" fill="none">
-                            <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4" />
-                            <path d="M8 5v3.5M8 10.5h.01" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
-                        </svg>
-                        {{ $message }}
-                    </div>
-                    @enderror
-                </div>
-
-                <!-- Remember me -->
-                <div class="checkbox-row">
-                    <label class="custom-checkbox">
-                        <input type="checkbox" name="remember">
-                        <span class="check-mark">
-                            <svg viewBox="0 0 12 12" fill="none">
-                                <path d="M2.5 6l2.5 2.5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                        </span>
-                        Se souvenir de moi
-                    </label>
-                </div>
-
-                <!-- Submit -->
-                <button type="submit" class="btn-submit">
-                    <span>Accéder à mon espace</span>
-                    <svg viewBox="0 0 20 20" width="18" height="18" fill="none">
-                        <path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                </button>
-            </form>
-        </div>
+            </footer>
+        </main>
     </div>
 
+    <!-- ═══════════════════════════════════════════
+         INTERACTIONS PHYSIQUES & MICRO-ANIMATIONS (JS VANILLA)
+         ═══════════════════════════════════════════ -->
     <script>
-        // Toggle password visibility
-        function togglePassword() {
-            const input = document.getElementById('password');
-            const eyeOpen = document.getElementById('eyeOpen');
-            const eyeClosed = document.getElementById('eyeClosed');
+        document.addEventListener('DOMContentLoaded', () => {
+            const passwordInput = document.getElementById('password');
+            const togglePasswordBtn = document.getElementById('btnTogglePassword');
+            const eyeIcon = document.getElementById('eyeIcon');
+            const loginForm = document.getElementById('loginForm');
+            const btnSubmit = document.getElementById('btnSubmitLogin');
 
-            if (input.type === 'password') {
-                input.type = 'text';
-                eyeOpen.style.display = 'none';
-                eyeClosed.style.display = 'block';
-            } else {
-                input.type = 'password';
-                eyeOpen.style.display = 'block';
-                eyeClosed.style.display = 'none';
+            // 1. Bascule d'affichage du mot de passe
+            if (togglePasswordBtn && passwordInput && eyeIcon) {
+                togglePasswordBtn.addEventListener('click', () => {
+                    const isPassword = passwordInput.getAttribute('type') === 'password';
+                    passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+                    togglePasswordBtn.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
+
+                    if (isPassword) {
+                        eyeIcon.classList.remove('bi-eye');
+                        eyeIcon.classList.add('bi-eye-slash');
+                        togglePasswordBtn.setAttribute('title', 'Masquer le mot de passe');
+                    } else {
+                        eyeIcon.classList.remove('bi-eye-slash');
+                        eyeIcon.classList.add('bi-eye');
+                        togglePasswordBtn.setAttribute('title', 'Afficher le mot de passe');
+                    }
+                });
             }
-        }
 
-        // Subtle entrance animation for form groups
-        document.querySelectorAll('.form-group, .social-row, .divider, .btn-submit, .checkbox-row').forEach((el, i) => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(12px)';
-            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-            setTimeout(() => {
-                el.style.opacity = '1';
-                el.style.transform = 'translateY(0)';
-            }, 150 + i * 70);
+            // 2. État de chargement physique à la soumission
+            if (loginForm && btnSubmit) {
+                loginForm.addEventListener('submit', (e) => {
+                    // Si le formulaire est déjà en cours d'envoi, bloquer le double clic
+                    if (btnSubmit.classList.contains('is-loading')) {
+                        e.preventDefault();
+                        return;
+                    }
+
+                    // Validation basique côté client pour rétroaction immédiate
+                    const email = document.getElementById('email');
+                    if (email && (!email.value || !email.validity.valid)) {
+                        email.focus();
+                        return;
+                    }
+
+                    if (passwordInput && !passwordInput.value) {
+                        passwordInput.focus();
+                        return;
+                    }
+
+                    btnSubmit.classList.add('is-loading');
+                    btnSubmit.setAttribute('aria-busy', 'true');
+                });
+            }
         });
     </script>
-
 </body>
 
 </html>

@@ -1,1856 +1,1230 @@
-<!DOCTYPE html>
-<html lang="fr">
+@extends('layouts.app')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - LOCATRIB IMMO</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+@section('title', 'Tableau de bord — ImmoPro')
 
-    <style>
-        :root {
-            --bg: #f0f3f6;
-            --surface: #ffffff;
-            --surface-hover: #f7f9fb;
-            --border: rgba(40, 75, 99, 0.1);
-            --border-hover: rgba(40, 75, 99, 0.2);
+@push('styles')
+<style>
+    /* ╔══════════════════════════════════════════════════════════════════════╗
+       ║  TABLEAU DE BORD IMMOPRO — CONCEPTION HAUT DE GAMME                  ║
+       ║  RÈGLE STRICTE : ZÉRO DÉGRADÉ — SURFACES SOLIDES CALIBRÉES           ║
+       ║  Tokens officiels : #F8F9FA, #1B3A5C, #5A6B7B, #E8734A, #222831      ║
+       ╚══════════════════════════════════════════════════════════════════════╝ */
 
-            --primary: #1b3a4f;
-            --primary-hover: #132b3a;
-            --primary-muted: rgba(27, 58, 79, 0.07);
-            --primary-border: rgba(27, 58, 79, 0.18);
+    .dash-wrapper {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 2.25rem clamp(1rem, 3vw, 2.5rem) 4.5rem;
+    }
 
-            --teal: #2a7d7f;
-            --teal-hover: #1f6365;
-            --teal-muted: rgba(42, 125, 127, 0.08);
-            --teal-border: rgba(42, 125, 127, 0.2);
+    /* Fil d'Ariane */
+    .dash-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+    }
 
-            --teal-light: #5db8b5;
-            --teal-light-muted: rgba(93, 184, 181, 0.12);
+    .dash-breadcrumb a {
+        color: var(--text-secondary);
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        transition: color var(--duration-fast) var(--ease-out-expo);
+    }
 
-            --text-primary: #111827;
-            --text-secondary: #374151;
-            --text-muted: #6b7280;
+    .dash-breadcrumb a:hover {
+        color: var(--color-primary);
+    }
 
-            --green: #16a34a;
-            --green-muted: rgba(22, 163, 74, 0.08);
-            --red: #dc2626;
-            --red-muted: rgba(220, 38, 38, 0.08);
-            --orange: #d97706;
-            --orange-muted: rgba(217, 119, 6, 0.08);
-            --blue: #2563eb;
-            --blue-muted: rgba(37, 99, 235, 0.08);
+    .dash-breadcrumb .sep {
+        color: var(--border-strong);
+        font-size: 0.75rem;
+    }
 
-            --shadow-sm: 0 1px 3px rgba(40, 75, 99, 0.08);
-            --shadow-md: 0 4px 16px rgba(40, 75, 99, 0.1);
-            --shadow-lg: 0 12px 40px rgba(40, 75, 99, 0.13);
+    .dash-breadcrumb .current {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
 
-            --font-display: 'Playfair Display', serif;
-            --font-body: 'Plus Jakarta Sans', sans-serif;
-            --radius: 16px;
-            --radius-sm: 10px;
-            --sidebar-w: 272px;
-            --nav-h: 68px;
+    /* En-tête du Dashboard */
+    .dash-header {
+        background-color: var(--surface-base);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-lg);
+        padding: 1.75rem 2rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.5rem;
+        box-shadow: var(--shadow-raised);
+    }
+
+    .dash-header-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .dash-role-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        align-self: flex-start;
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-full);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        background-color: oklch(0.96 0.01 255);
+        color: var(--color-primary);
+        border: 1px solid var(--border-default);
+    }
+
+    .dash-role-badge i {
+        font-size: 0.85rem;
+        color: var(--color-cta);
+    }
+
+    .dash-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: clamp(1.5rem, 3vw, 2rem);
+        font-weight: 700;
+        color: var(--color-primary);
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+        margin: 0;
+    }
+
+    .dash-title em {
+        font-style: normal;
+        color: var(--color-cta);
+    }
+
+    .dash-subtitle {
+        color: var(--color-secondary);
+        font-size: 0.9375rem;
+        margin: 0;
+        max-width: 620px;
+        line-height: 1.5;
+    }
+
+    .dash-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-shrink: 0;
+    }
+
+    /* Barre de navigation interne (Tabs de navigation) */
+    .dash-tabs {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.375rem;
+        background-color: var(--surface-base);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-full);
+        margin-bottom: 2rem;
+        overflow-x: auto;
+        box-shadow: var(--shadow-raised);
+    }
+
+    .dash-tab-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-full);
+        font-size: 0.84rem;
+        font-weight: 600;
+        color: var(--color-secondary);
+        text-decoration: none;
+        white-space: nowrap;
+        transition: background-color var(--duration-fast) var(--ease-out-expo),
+                    color var(--duration-fast) var(--ease-out-expo);
+    }
+
+    .dash-tab-link:hover {
+        color: var(--color-primary);
+        background-color: var(--surface-sunken);
+    }
+
+    .dash-tab-link.active {
+        background-color: var(--color-primary);
+        color: #ffffff;
+        box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+    }
+
+    .dash-tab-link.active i {
+        color: var(--color-cta);
+    }
+
+    /* Grille des KPI Metrics */
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+    }
+
+    .kpi-card {
+        background-color: var(--surface-base);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        padding: 1.35rem 1.25rem;
+        box-shadow: var(--shadow-raised);
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        transition: transform var(--duration-fast) var(--ease-out-expo),
+                    box-shadow var(--duration-fast) var(--ease-out-expo),
+                    border-color var(--duration-fast) var(--ease-out-expo);
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-card);
+        border-color: var(--border-strong);
+    }
+
+    .kpi-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .kpi-icon-wrap {
+        width: 38px;
+        height: 38px;
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    .kpi-icon-wrap.primary {
+        background-color: oklch(0.96 0.02 250);
+        color: var(--color-primary);
+        border: 1px solid oklch(0.90 0.03 250);
+    }
+
+    .kpi-icon-wrap.cta {
+        background-color: oklch(0.96 0.03 45);
+        color: var(--color-cta);
+        border: 1px solid oklch(0.90 0.05 45);
+    }
+
+    .kpi-icon-wrap.slate {
+        background-color: oklch(0.96 0.01 230);
+        color: var(--color-secondary);
+        border: 1px solid oklch(0.90 0.02 230);
+    }
+
+    .kpi-icon-wrap.success {
+        background-color: oklch(0.96 0.03 145);
+        color: #196C45;
+        border: 1px solid oklch(0.88 0.06 145);
+    }
+
+    .kpi-pill {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 0.2rem 0.55rem;
+        border-radius: var(--radius-full);
+        background-color: var(--surface-sunken);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-subtle);
+    }
+
+    .kpi-pill.success {
+        background-color: #EBF8F2;
+        color: #196C45;
+        border-color: #A3E3C1;
+    }
+
+    .kpi-value {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.85rem;
+        font-weight: 700;
+        color: var(--color-primary);
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+    }
+
+    .kpi-label {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--color-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    /* Grille d'actions rapides */
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2.25rem;
+    }
+
+    .action-tile {
+        background-color: var(--surface-base);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        padding: 1.1rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        text-decoration: none;
+        color: inherit;
+        box-shadow: var(--shadow-raised);
+        transition: transform var(--duration-fast) var(--ease-out-expo),
+                    border-color var(--duration-fast) var(--ease-out-expo),
+                    box-shadow var(--duration-fast) var(--ease-out-expo);
+    }
+
+    .action-tile:hover {
+        transform: translateY(-2px);
+        border-color: var(--color-primary);
+        box-shadow: var(--shadow-card);
+    }
+
+    .action-tile:active {
+        transform: translateY(0);
+    }
+
+    .action-tile-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-sm);
+        background-color: var(--surface-sunken);
+        border: 1px solid var(--border-default);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        color: var(--color-primary);
+        flex-shrink: 0;
+        transition: background-color var(--duration-fast) var(--ease-out-expo),
+                    color var(--duration-fast) var(--ease-out-expo);
+    }
+
+    .action-tile:hover .action-tile-icon {
+        background-color: var(--color-primary);
+        color: #ffffff;
+        border-color: var(--color-primary);
+    }
+
+    .action-tile-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .action-tile-title {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--color-primary);
+    }
+
+    .action-tile-desc {
+        font-size: 0.775rem;
+        color: var(--color-secondary);
+    }
+
+    /* Section Tableau des Biens Récents */
+    .dash-card {
+        background-color: var(--surface-base);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-raised);
+        margin-bottom: 2.25rem;
+        overflow: hidden;
+    }
+
+    .dash-card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-subtle);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: var(--surface-base);
+    }
+
+    .dash-card-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--color-primary);
+        margin: 0;
+    }
+
+    .dash-card-title i {
+        color: var(--color-cta);
+        font-size: 1rem;
+    }
+
+    .dash-card-link {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--color-primary);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        transition: color var(--duration-fast) var(--ease-out-expo);
+    }
+
+    .dash-card-link:hover {
+        color: var(--color-cta);
+    }
+
+    /* Tableau Architectural Solide */
+    .table-container {
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    .pro-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+        text-align: left;
+    }
+
+    .pro-table th {
+        background-color: var(--surface-sunken);
+        color: var(--color-secondary);
+        font-weight: 600;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 0.85rem 1.25rem;
+        border-bottom: 1px solid var(--border-default);
+        white-space: nowrap;
+    }
+
+    .pro-table td {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--border-subtle);
+        color: var(--color-text-main);
+        vertical-align: middle;
+    }
+
+    .pro-table tbody tr {
+        transition: background-color var(--duration-fast) var(--ease-out-expo);
+    }
+
+    .pro-table tbody tr:hover {
+        background-color: oklch(0.99 0.003 250);
+    }
+
+    .pro-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .bien-meta-title {
+        font-weight: 700;
+        color: var(--color-primary);
+        text-decoration: none;
+        display: block;
+        line-height: 1.3;
+        transition: color var(--duration-fast) var(--ease-out-expo);
+    }
+
+    .bien-meta-title:hover {
+        color: var(--color-cta);
+    }
+
+    .bien-meta-location {
+        font-size: 0.75rem;
+        color: var(--color-secondary);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        margin-top: 0.15rem;
+    }
+
+    .price-cell {
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 700;
+        color: var(--color-primary);
+        font-size: 0.9rem;
+        white-space: nowrap;
+    }
+
+    /* Badges de Statut Solides */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.22rem 0.6rem;
+        border-radius: var(--radius-full);
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        white-space: nowrap;
+        border: 1px solid transparent;
+    }
+
+    .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .status-badge.active {
+        background-color: #EBF8F2;
+        color: #196C45;
+        border-color: #A3E3C1;
+    }
+    .status-badge.active .status-dot { background-color: #196C45; }
+
+    .status-badge.warning {
+        background-color: #FFFBEB;
+        color: #92400E;
+        border-color: #FCD34D;
+    }
+    .status-badge.warning .status-dot { background-color: #D97706; }
+
+    .status-badge.muted {
+        background-color: var(--surface-sunken);
+        color: var(--color-secondary);
+        border-color: var(--border-default);
+    }
+    .status-badge.muted .status-dot { background-color: var(--color-secondary); }
+
+    /* Actions de tableau */
+    .table-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .btn-action-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: var(--radius-sm);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border-default);
+        background-color: var(--surface-base);
+        color: var(--color-secondary);
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color var(--duration-fast) var(--ease-out-expo),
+                    color var(--duration-fast) var(--ease-out-expo),
+                    border-color var(--duration-fast) var(--ease-out-expo);
+    }
+
+    .btn-action-icon:hover {
+        background-color: var(--surface-sunken);
+        color: var(--color-primary);
+        border-color: var(--color-primary);
+    }
+
+    .btn-action-icon.danger:hover {
+        background-color: #FDF2F2;
+        color: #991B1B;
+        border-color: #FCA5A5;
+    }
+
+    /* Grille inférieure (Double Colonne : Activité & Messages) */
+    .dual-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .feed-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .feed-item {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border-subtle);
+        display: flex;
+        align-items: flex-start;
+        gap: 0.85rem;
+        transition: background-color var(--duration-fast) var(--ease-out-expo);
+    }
+
+    .feed-item:last-child {
+        border-bottom: none;
+    }
+
+    .feed-item:hover {
+        background-color: oklch(0.99 0.003 250);
+    }
+
+    .feed-bullet {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-top: 0.45rem;
+        flex-shrink: 0;
+    }
+
+    .feed-bullet.primary { background-color: var(--color-primary); }
+    .feed-bullet.cta     { background-color: var(--color-cta); }
+    .feed-bullet.success { background-color: #196C45; }
+    .feed-bullet.slate   { background-color: var(--color-secondary); }
+
+    .feed-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .feed-title {
+        font-size: 0.875rem;
+        color: var(--color-text-main);
+        line-height: 1.4;
+    }
+
+    .feed-time {
+        font-size: 0.75rem;
+        color: var(--color-secondary);
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* État Vide (Empty State) */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1.5rem;
+        color: var(--color-secondary);
+    }
+
+    .empty-state-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-md);
+        background-color: var(--surface-sunken);
+        border: 1px solid var(--border-default);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.5rem;
+        color: var(--color-secondary);
+    }
+
+    .empty-state-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--color-primary);
+        margin-bottom: 0.35rem;
+    }
+
+    .empty-state-desc {
+        font-size: 0.85rem;
+        color: var(--color-secondary);
+        margin-bottom: 1.25rem;
+        max-width: 400px;
+        margin-inline: auto;
+    }
+
+    /* Adaptabilité Mobile & Responsive */
+    @media (max-width: 1024px) {
+        .kpi-grid {
+            grid-template-columns: repeat(2, 1fr);
         }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        .dual-grid {
+            grid-template-columns: 1fr;
         }
+    }
 
-        body {
-            background: var(--bg);
-            color: var(--text-primary);
-            font-family: var(--font-body);
-            min-height: 100vh;
-        }
-
-        /* ========================================
-           TOP NAV
-        ======================================== */
-        .topnav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: var(--nav-h);
-            z-index: 200;
-            background: linear-gradient(135deg, var(--primary) 0%, #2a5a6d 100%);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 1.5rem 0 1.75rem;
-            box-shadow: 0 2px 20px rgba(27, 58, 79, 0.25);
-        }
-
-        .topnav-left {
-            display: flex;
-            align-items: center;
-            gap: 1.2rem;
-        }
-
-        .sidebar-toggle {
-            display: none;
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 1.35rem;
-            cursor: pointer;
-            padding: 0.3rem;
-            transition: color 0.2s;
-        }
-
-        .sidebar-toggle:hover {
-            color: #fff;
-        }
-
-        .topnav-brand {
-            font-family: var(--font-display);
-            font-size: 1.6rem;
-            color: #ffffff;
-            text-decoration: none;
-            font-style: italic;
-            font-weight: 700;
-            letter-spacing: -0.01em;
-            transition: opacity 0.2s;
-        }
-
-        .topnav-brand:hover {
-            opacity: 0.9;
-        }
-
-        /* ===== BOUTON RETOUR ACCUEIL ===== */
-        .home-link {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.45rem 1rem;
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            border-radius: 50px;
-            color: #ffffff;
-            text-decoration: none;
-            font-size: 0.78rem;
-            font-weight: 600;
-            letter-spacing: 0.01em;
-            transition: all 0.25s;
-            backdrop-filter: blur(10px);
-        }
-
-        .home-link:hover {
-            background: rgba(255, 255, 255, 0.22);
-            border-color: rgba(255, 255, 255, 0.35);
-            transform: translateX(-2px);
-        }
-
-        .home-link i {
-            font-size: 0.88rem;
-        }
-
-        .topnav-right {
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-        }
-
-        .topnav-search {
-            position: relative;
-        }
-
-        .topnav-search input {
-            background: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: var(--radius-sm);
-            padding: 0.55rem 0.9rem 0.55rem 2.3rem;
-            color: #fff;
-            font-size: 0.82rem;
-            font-family: var(--font-body);
-            width: 240px;
-            transition: all 0.25s;
-            outline: none;
-        }
-
-        .topnav-search input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .topnav-search input:focus {
-            border-color: rgba(255, 255, 255, 0.35);
-            background: rgba(255, 255, 255, 0.18);
-            width: 290px;
-        }
-
-        .topnav-search i {
-            position: absolute;
-            left: 0.8rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 0.88rem;
-        }
-
-        .topnav-btn {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: var(--radius-sm);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            background: rgba(255, 255, 255, 0.08);
-            color: rgba(255, 255, 255, 0.85);
-            cursor: pointer;
-            transition: all 0.2s;
-            font-size: 1rem;
-            position: relative;
-            text-decoration: none;
-        }
-
-        .topnav-btn:hover {
-            background: rgba(255, 255, 255, 0.18);
-            color: #fff;
-            border-color: rgba(255, 255, 255, 0.25);
-        }
-
-        .topnav-btn .notif-dot {
-            position: absolute;
-            top: 7px;
-            right: 7px;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #ef4444;
-            border: 2px solid var(--primary);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.5;
-            }
-        }
-
-        .topnav-user {
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-            padding: 0.35rem 0.6rem 0.35rem 0.35rem;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: background 0.2s;
-            position: relative;
-        }
-
-        .topnav-user:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .topnav-avatar {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            background: linear-gradient(135deg, var(--teal), var(--teal-light));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 0.8rem;
-            color: #fff;
-            letter-spacing: 0.02em;
-        }
-
-        .topnav-user-meta {
-            display: flex;
+    @media (max-width: 768px) {
+        .dash-header {
             flex-direction: column;
-        }
-
-        .topnav-user-name {
-            font-size: 0.82rem;
-            font-weight: 700;
-            color: #ffffff;
-            line-height: 1.2;
-        }
-
-        .topnav-user-role {
-            font-size: 0.65rem;
-            color: rgba(255, 255, 255, 0.55);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-weight: 600;
-        }
-
-        .topnav-user .bi-chevron-expand {
-            font-size: 0.6rem;
-            color: rgba(255, 255, 255, 0.4);
-            margin-left: 0.1rem;
-        }
-
-        /* User Dropdown */
-        .user-dropdown {
-            position: absolute;
-            top: calc(100% + 10px);
-            right: 0;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 0.5rem;
-            min-width: 225px;
-            display: none;
-            z-index: 300;
-            box-shadow: var(--shadow-lg);
-        }
-
-        .user-dropdown.show {
-            display: block;
-            animation: ddIn 0.2s ease;
-        }
-
-        @keyframes ddIn {
-            from {
-                opacity: 0;
-                transform: translateY(-8px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .ud-header {
-            padding: 0.8rem 0.7rem;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 0.3rem;
-        }
-
-        .ud-header-name {
-            font-weight: 700;
-            font-size: 0.88rem;
-            color: var(--text-primary);
-        }
-
-        .ud-header-email {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-        }
-
-        .ud-item {
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-            padding: 0.6rem 0.75rem;
-            color: var(--text-secondary);
-            text-decoration: none;
-            border-radius: 8px;
-            font-size: 0.83rem;
-            font-weight: 500;
-            transition: all 0.12s;
-            border: none;
-            background: none;
-            cursor: pointer;
-            width: 100%;
-            font-family: var(--font-body);
-        }
-
-        .ud-item:hover {
-            background: var(--primary-muted);
-            color: var(--primary);
-        }
-
-        .ud-item i {
-            font-size: 0.98rem;
-            color: var(--text-muted);
-            width: 18px;
-            text-align: center;
-            transition: color 0.12s;
-        }
-
-        .ud-item:hover i {
-            color: var(--primary);
-        }
-
-        .ud-item.danger {
-            color: var(--red);
-        }
-
-        .ud-item.danger:hover {
-            background: var(--red-muted);
-        }
-
-        .ud-item.danger i {
-            color: var(--red);
-        }
-
-        .ud-divider {
-            height: 1px;
-            background: var(--border);
-            margin: 0.35rem 0;
-        }
-
-        /* ========================================
-           SIDEBAR
-        ======================================== */
-        .sidebar {
-            position: fixed;
-            top: var(--nav-h);
-            left: 0;
-            bottom: 0;
-            width: var(--sidebar-w);
-            background: var(--surface);
-            border-right: 1px solid var(--border);
-            z-index: 150;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 1.2rem 0.85rem;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .sidebar::-webkit-scrollbar {
-            width: 3px;
-        }
-
-        .sidebar::-webkit-scrollbar-thumb {
-            background: var(--border-hover);
-            border-radius: 10px;
-        }
-
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(17, 24, 39, 0.5);
-            z-index: 140;
-            backdrop-filter: blur(3px);
-        }
-
-        .sidebar-section {
-            margin-bottom: 1.4rem;
-        }
-
-        .sidebar-label {
-            font-size: 0.64rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: var(--text-muted);
-            padding: 0 0.75rem;
-            margin-bottom: 0.5rem;
-            font-weight: 700;
-        }
-
-        .sidebar-link {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.65rem 0.75rem;
-            border-radius: var(--radius-sm);
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.86rem;
-            font-weight: 500;
-            transition: all 0.15s;
-            position: relative;
-        }
-
-        .sidebar-link i {
-            font-size: 1.1rem;
-            width: 22px;
-            text-align: center;
-            flex-shrink: 0;
-            transition: color 0.15s;
-        }
-
-        .sidebar-link .link-badge {
-            margin-left: auto;
-            background: var(--teal-muted);
-            color: var(--teal);
-            font-size: 0.64rem;
-            font-weight: 700;
-            padding: 0.18rem 0.55rem;
-            border-radius: 20px;
-            letter-spacing: 0.02em;
-        }
-
-        .sidebar-link .link-badge.red {
-            background: var(--red-muted);
-            color: var(--red);
-        }
-
-        .sidebar-link:hover {
-            background: var(--primary-muted);
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        .sidebar-link:hover i {
-            color: var(--teal);
-        }
-
-        .sidebar-link.active {
-            background: linear-gradient(135deg, rgba(27, 58, 79, 0.1), rgba(42, 125, 127, 0.08));
-            color: var(--primary);
-            font-weight: 700;
-        }
-
-        .sidebar-link.active i {
-            color: var(--teal);
-        }
-
-        .sidebar-link.active::before {
-            content: '';
-            position: absolute;
-            left: -0.85rem;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 3.5px;
-            height: 24px;
-            border-radius: 0 4px 4px 0;
-            background: linear-gradient(180deg, var(--teal), var(--teal-light));
-        }
-
-        /* Sidebar footer */
-        .sidebar-footer {
-            border-top: 1px solid var(--border);
-            padding-top: 1rem;
-            margin-top: 0.5rem;
-        }
-
-        .sidebar-usage {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 1rem;
-            margin: 0 0.15rem;
-        }
-
-        .sidebar-usage-label {
-            font-size: 0.74rem;
-            color: var(--text-muted);
-            margin-bottom: 0.6rem;
-            display: flex;
-            justify-content: space-between;
-            font-weight: 500;
-        }
-
-        .sidebar-usage-label span {
-            color: var(--text-primary);
-            font-weight: 800;
-        }
-
-        .usage-bar {
-            height: 6px;
-            background: rgba(40, 75, 99, 0.08);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .usage-bar-fill {
-            height: 100%;
-            border-radius: 10px;
-            background: linear-gradient(90deg, var(--teal), var(--teal-light));
-            transition: width 0.6s ease;
-        }
-
-        /* ========================================
-           MAIN CONTENT
-        ======================================== */
-        .main {
-            margin-left: var(--sidebar-w);
-            margin-top: var(--nav-h);
-            min-height: calc(100vh - var(--nav-h));
-            padding: 2rem 2.25rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Page Header */
-        .page-header {
-            margin-bottom: 2rem;
-        }
-
-        .page-header h1 {
-            font-family: var(--font-display);
-            font-size: 2.1rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            line-height: 1.15;
-        }
-
-        .page-header h1 em {
-            font-style: italic;
-            color: var(--teal);
-            font-weight: 600;
-        }
-
-        .page-header p {
-            color: var(--text-muted);
-            margin-top: 0.45rem;
-            font-size: 0.92rem;
-            font-weight: 400;
-        }
-
-        .page-header-row {
-            display: flex;
-            justify-content: space-between;
             align-items: flex-start;
-            flex-wrap: wrap;
-            gap: 1rem;
+            padding: 1.25rem;
         }
-
-        /* ===== BUTTONS ===== */
-        .btn {
-            padding: 0.65rem 1.3rem;
-            border-radius: var(--radius-sm);
-            border: none;
-            cursor: pointer;
-            font-family: var(--font-body);
-            font-weight: 700;
-            font-size: 0.85rem;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.55rem;
-            transition: all 0.25s ease;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--teal), var(--teal-light));
-            color: #fff;
-            box-shadow: 0 3px 12px rgba(42, 125, 127, 0.3);
-        }
-
-        .btn-primary:hover {
-            box-shadow: 0 6px 24px rgba(42, 125, 127, 0.35);
-            transform: translateY(-2px);
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1.5px solid var(--border);
-            color: var(--text-secondary);
-        }
-
-        .btn-outline:hover {
-            border-color: var(--teal);
-            color: var(--teal);
-            background: var(--teal-muted);
-        }
-
-        .btn-sm {
-            padding: 0.38rem 0.75rem;
-            font-size: 0.76rem;
-        }
-
-        .btn-icon {
-            width: 36px;
-            height: 36px;
-            padding: 0;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            font-size: 0.92rem;
-        }
-
-        .btn-icon:hover {
-            border-color: var(--teal);
-            color: var(--teal);
-            background: var(--teal-muted);
-        }
-
-        .btn-icon.danger:hover {
-            border-color: var(--red);
-            color: var(--red);
-            background: var(--red-muted);
-        }
-
-        /* ===== ALERTS ===== */
-        .alert {
-            padding: 0.95rem 1.2rem;
-            border-radius: var(--radius-sm);
-            margin-bottom: 1.5rem;
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            opacity: 0;
-            animation: fadeUp 0.4s ease forwards;
-        }
-
-        .alert-success {
-            background: var(--green-muted);
-            border: 1.5px solid rgba(22, 163, 74, 0.2);
-            color: var(--green);
-        }
-
-        .alert-danger {
-            background: var(--red-muted);
-            border: 1.5px solid rgba(220, 38, 38, 0.2);
-            color: var(--red);
-        }
-
-        .alert i {
-            font-size: 1.1rem;
-            flex-shrink: 0;
-        }
-
-        /* ===== STATS GRID ===== */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1.35rem;
-            transition: all 0.3s ease;
-            opacity: 0;
-            animation: fadeUp 0.5s ease forwards;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .stat-card:nth-child(1) {
-            animation-delay: 0.05s;
-        }
-
-        .stat-card:nth-child(2) {
-            animation-delay: 0.1s;
-        }
-
-        .stat-card:nth-child(3) {
-            animation-delay: 0.15s;
-        }
-
-        .stat-card:nth-child(4) {
-            animation-delay: 0.2s;
-        }
-
-        .stat-card:hover {
-            box-shadow: var(--shadow-md);
-            transform: translateY(-3px);
-            border-color: var(--teal-border);
-        }
-
-        .stat-card-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 0.85rem;
-        }
-
-        .stat-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.15rem;
-        }
-
-        .stat-icon.primary {
-            background: var(--primary-muted);
-            color: var(--primary);
-        }
-
-        .stat-icon.teal {
-            background: var(--teal-muted);
-            color: var(--teal);
-        }
-
-        .stat-icon.teal-light {
-            background: var(--teal-light-muted);
-            color: var(--teal-hover);
-        }
-
-        .stat-icon.green {
-            background: var(--green-muted);
-            color: var(--green);
-        }
-
-        .stat-icon.red {
-            background: var(--red-muted);
-            color: var(--red);
-        }
-
-        .stat-icon.orange {
-            background: var(--orange-muted);
-            color: var(--orange);
-        }
-
-        .stat-icon.blue {
-            background: var(--blue-muted);
-            color: var(--blue);
-        }
-
-        .stat-change {
-            font-size: 0.68rem;
-            font-weight: 700;
-            padding: 0.18rem 0.55rem;
-            border-radius: 20px;
-            background: var(--green-muted);
-            color: var(--green);
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            line-height: 1;
-            margin-bottom: 0.25rem;
-            color: var(--text-primary);
-        }
-
-        .stat-label {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-weight: 600;
-        }
-
-        /* ===== CARDS ===== */
-        .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            opacity: 0;
-            animation: fadeUp 0.5s ease forwards;
-            animation-delay: 0.25s;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.2rem;
-        }
-
-        .card-title {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-        }
-
-        .card-title i {
-            color: var(--teal);
-            font-size: 1.1rem;
-        }
-
-        .card-link {
-            color: var(--teal);
-            font-size: 0.78rem;
-            text-decoration: none;
-            font-weight: 700;
-            transition: color 0.2s;
-        }
-
-        .card-link:hover {
-            color: var(--teal-hover);
-        }
-
-        /* ===== QUICK ACTIONS ===== */
-        .action-row {
-            display: flex;
-            gap: 0.85rem;
-            flex-wrap: wrap;
-        }
-
-        .action-card {
-            flex: 1;
-            min-width: 130px;
-            background: var(--bg);
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 1.2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: block;
-        }
-
-        .action-card:hover {
-            border-color: var(--teal);
-            background: var(--teal-muted);
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .action-card i {
-            font-size: 1.5rem;
-            color: var(--teal);
-            display: block;
-            margin-bottom: 0.5rem;
-            transition: color 0.2s;
-        }
-
-        .action-card:hover i {
-            color: var(--primary);
-            transform: scale(1.1);
-        }
-
-        .action-card .action-title {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .action-card .action-desc {
-            font-size: 0.68rem;
-            color: var(--text-muted);
-            margin-top: 0.15rem;
-        }
-
-        /* ===== CONTENT GRID ===== */
-        .content-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 1.75rem;
-        }
-
-        /* ===== TABLE ===== */
-        .table-wrap {
-            overflow-x: auto;
-        }
-
-        table {
+        .dash-header-actions {
             width: 100%;
-            border-collapse: collapse;
-            font-size: 0.84rem;
+            justify-content: stretch;
         }
-
-        th {
-            text-align: left;
-            color: var(--text-muted);
-            font-weight: 700;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.07em;
-            padding: 0.8rem 1rem;
-            border-bottom: 2px solid var(--border);
-        }
-
-        td {
-            padding: 0.8rem 1rem;
-            border-bottom: 1px solid rgba(40, 75, 99, 0.05);
-            color: var(--text-primary);
-            font-weight: 450;
-        }
-
-        tbody tr {
-            transition: background 0.15s;
-        }
-
-        tbody tr:hover td {
-            background: var(--teal-muted);
-        }
-
-        /* Badges */
-        .badge {
-            padding: 0.25rem 0.7rem;
-            border-radius: 20px;
-            font-size: 0.68rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-        }
-
-        .badge-success {
-            background: var(--green-muted);
-            color: var(--green);
-        }
-
-        .badge-warning {
-            background: var(--orange-muted);
-            color: var(--orange);
-        }
-
-        .badge-danger {
-            background: var(--red-muted);
-            color: var(--red);
-        }
-
-        .badge-info {
-            background: var(--blue-muted);
-            color: var(--blue);
-        }
-
-        .badge-teal {
-            background: var(--teal-muted);
-            color: var(--teal);
-        }
-
-        .badge-muted {
-            background: rgba(107, 114, 128, 0.1);
-            color: var(--text-muted);
-        }
-
-        /* ===== ACTIVITY LIST ===== */
-        .activity-list {
-            list-style: none;
-        }
-
-        .activity-item {
-            display: flex;
-            gap: 0.9rem;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid rgba(40, 75, 99, 0.05);
-        }
-
-        .activity-item:last-child {
-            border-bottom: none;
-        }
-
-        .activity-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-top: 0.3rem;
-            flex-shrink: 0;
-        }
-
-        .activity-dot.primary {
-            background: var(--primary);
-        }
-
-        .activity-dot.teal {
-            background: var(--teal);
-        }
-
-        .activity-dot.green {
-            background: var(--green);
-        }
-
-        .activity-dot.red {
-            background: var(--red);
-        }
-
-        .activity-dot.orange {
-            background: var(--orange);
-        }
-
-        .activity-content {
+        .dash-header-actions .btn {
             flex: 1;
-            min-width: 0;
-        }
-
-        .activity-text {
-            font-size: 0.84rem;
-            line-height: 1.4;
-            color: var(--text-secondary);
-        }
-
-        .activity-text strong {
-            color: var(--text-primary);
-            font-weight: 700;
-        }
-
-        .activity-time {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            margin-top: 0.2rem;
-            font-weight: 500;
-        }
-
-        .full-width {
-            grid-column: 1 / -1;
-        }
-
-        .section-label {
-            font-size: 0.68rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 0.7rem;
-            display: flex;
-            align-items: center;
-            gap: 0.45rem;
-            font-weight: 700;
-        }
-
-        .section-label i {
-            color: var(--teal);
-        }
-
-        /* ===== FOOTER ===== */
-        .site-footer {
-            margin-left: var(--sidebar-w);
             text-align: center;
-            padding: 2rem;
-            border-top: 1px solid var(--border);
-            position: relative;
-            z-index: 1;
         }
-
-        .site-footer .footer-text {
-            color: var(--text-muted);
-            font-size: 0.78rem;
+        .kpi-grid {
+            grid-template-columns: 1fr;
         }
-
-        .site-footer .footer-text a {
-            color: var(--teal);
-            text-decoration: none;
-            font-family: var(--font-display);
-            font-style: italic;
-            font-weight: 700;
-            transition: color 0.2s;
+        .actions-grid {
+            grid-template-columns: 1fr;
         }
+    }
+</style>
+@endpush
 
-        .site-footer .footer-text a:hover {
-            color: var(--primary);
-        }
+@section('content')
+<div class="dash-wrapper">
 
-        /* ===== ANIMATIONS ===== */
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(16px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 1024px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .topnav-search {
-                display: none;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-
-            .sidebar.open {
-                transform: translateX(0);
-            }
-
-            .sidebar-overlay.show {
-                display: block;
-            }
-
-            .sidebar-toggle {
-                display: block;
-            }
-
-            .main {
-                margin-left: 0;
-                padding: 1.25rem 1rem;
-            }
-
-            .site-footer {
-                margin-left: 0;
-            }
-
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .topnav-user-meta {
-                display: none;
-            }
-
-            .page-header h1 {
-                font-size: 1.5rem;
-            }
-
-            .page-header-row {
-                flex-direction: column;
-            }
-
-            .home-link span {
-                display: none;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-
-<body>
-
-    <!-- ===== TOP NAV ===== -->
-    <nav class="topnav">
-        <div class="topnav-left">
-            <button class="sidebar-toggle" onclick="toggleSidebar()">
-                <i class="bi bi-list"></i>
-            </button>
-            <a href="{{ route('home') }}" class="topnav-brand">LocaTribe</a>
-            <a href="{{ route('home') }}" class="home-link" title="Retour à l'accueil">
-                <i class="bi bi-house-door"></i>
-                <span>Retour au site</span>
-            </a>
-        </div>
-
-        <div class="topnav-right">
-            <div class="topnav-search">
-                <i class="bi bi-search"></i>
-                <input type="text" placeholder="Rechercher un bien, un client...">
-            </div>
-
-            <a href="{{ route('home') }}" class="topnav-btn" title="Page d'accueil">
-                <i class="bi bi-house-gear"></i>
-            </a>
-
-            <a href="#" class="topnav-btn" title="Notifications">
-                <i class="bi bi-bell"></i>
-                <span class="notif-dot"></span>
-            </a>
-
-            <a href="" class="topnav-btn" title="Messages">
-                <i class="bi bi-chat-dots"></i>
-            </a>
-
-            <!-- User Menu -->
-            <div class="topnav-user" onclick="toggleUserDropdown(event)">
-                <div class="topnav-avatar">
-                    {{ strtoupper(substr($user->name, 0, 2)) }}
-                </div>
-                <div class="topnav-user-meta">
-                    <div class="topnav-user-name">{{ $user->name }}</div>
-                    <div class="topnav-user-role">
-                        @if($user->estAdmin()) Admin
-                        @elseif($user->role === 'agence') Agence
-                        @elseif($user->role === 'proprietaire') Propriétaire
-                        @else Locataire
-                        @endif
-                    </div>
-                </div>
-                <i class="bi bi-chevron-expand"></i>
-
-                <div class="user-dropdown" id="userDropdown">
-                    <div class="ud-header">
-                        <div class="ud-header-name">{{ $user->name }}</div>
-                        <div class="ud-header-email">{{ $user->email ?? '' }}</div>
-                    </div>
-                    <a href="#" class="ud-item">
-                        <i class="bi bi-person"></i> Mon profil
-                    </a>
-                    <a href="{{ route('dashboard') }}" class="ud-item">
-                        <i class="bi bi-grid"></i> Dashboard
-                    </a>
-                    @if($user->estAdmin())
-                    <a href="{{ route('admin.dashboard') }}" class="ud-item">
-                        <i class="bi bi-shield-lock"></i> Administration
-                    </a>
-                    @endif
-                    <a href="{{ route('home') }}" class="ud-item">
-                        <i class="bi bi-house"></i> Page d'accueil
-                    </a>
-                    <div class="ud-divider"></div>
-                    <form method="POST" action="{{ route('logout') }}" style="margin: 0;">
-                        @csrf
-                        <button type="submit" class="ud-item danger">
-                            <i class="bi bi-box-arrow-right"></i> Déconnexion
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
+    {{-- Fil d'Ariane --}}
+    <nav class="dash-breadcrumb" aria-label="Fil d'Ariane">
+        <a href="{{ route('home') }}"><i class="bi bi-house-door" aria-hidden="true"></i> Accueil</a>
+        <span class="sep" aria-hidden="true">/</span>
+        <span class="current">Espace Personnel</span>
     </nav>
 
-    <!-- Overlay mobile -->
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
-    <!-- ===== SIDEBAR ===== -->
-    <aside class="sidebar" id="sidebar">
-
-        {{-- ========================================
-             MENU : ADMINISTRATEUR
-        ======================================== --}}
-        @if($user->estAdmin())
-        <div class="sidebar-section">
-            <div class="sidebar-label">Administration</div>
-            <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                <i class="bi bi-speedometer2"></i> Vue d'ensemble
-            </a>
-            <a href="{{ route('admin.users.index') }}" class="sidebar-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                <i class="bi bi-people"></i> Utilisateurs
-                <span class="link-badge">{{ $stats['total_users'] ?? 0 }}</span>
-            </a>
-            <a href="{{ route('admin.agences.index') }}" class="sidebar-link {{ request()->routeIs('admin.agences.*') ? 'active' : '' }}">
-                <i class="bi bi-shop"></i> Agences
-            </a>
-            <a href="{{ route('admin.biens.index') }}" class="sidebar-link {{ request()->routeIs('admin.biens.*') ? 'active' : '' }}">
-                <i class="bi bi-building-check"></i> Biens
-                <span class="link-badge red">{{ $stats['biens_en_attente'] ?? 0 }}</span>
-            </a>
-            <a href="#" class="sidebar-link">
-                <i class="bi bi-receipt"></i> Transactions
-            </a>
-            <a href="#" class="sidebar-link">
-                <i class="bi bi-flag"></i> Signalements
-            </a>
-        </div>
-        <div class="sidebar-section">
-            <div class="sidebar-label">Analyses</div>
-            <a href="#" class="sidebar-link">
-                <i class="bi bi-graph-up-arrow"></i> Statistiques
-            </a>
-            <a href="#" class="sidebar-link">
-                <i class="bi bi-file-earmark-bar-graph"></i> Rapports
-            </a>
-        </div>
-        <div class="sidebar-section">
-            <div class="sidebar-label">Système</div>
-            <a href="#" class="sidebar-link">
-                <i class="bi bi-gear"></i> Paramètres
-            </a>
-            <a href="#" class="sidebar-link">
-                <i class="bi bi-journal-text"></i> Journaux
-            </a>
-        </div>
-        @endif
-
-        {{-- ========================================
-             MENU : AGENCE
-        ======================================== --}}
-        @if($user->role === 'agence')
-        <div class="sidebar-section">
-            <div class="sidebar-label">Mon agence</div>
-            <a href="{{ route('dashboard') }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                <i class="bi bi-speedometer2"></i> Vue d'ensemble
-            </a>
-            <a href="{{ route('annonces.mes-annonces') }}" class="sidebar-link {{ request()->routeIs('annonces.mes-annonces') ? 'active' : '' }}">
-                <i class="bi bi-building"></i> Mes biens
-                <span class="link-badge">{{ $stats['total_biens'] ?? 0 }}</span>
-            </a>
-            <a href="{{ route('annonces.create') }}" class="sidebar-link {{ request()->routeIs('annonces.create') ? 'active' : '' }}">
-                <i class="bi bi-plus-circle"></i> Ajouter un bien
-            </a>
-        </div>
-        <div class="sidebar-section">
-            <div class="sidebar-label">Communication</div>
-            @if(Route::has('messages.index'))
-            <a href="{{ route('messages.index') }}" class="sidebar-link {{ request()->routeIs('messages.*') ? 'active' : '' }}">
-                <i class="bi bi-chat-dots"></i> Messages
-                <span class="link-badge red">{{ $stats['nouveaux_messages'] ?? 0 }}</span>
-            </a>
-            @endif
-            @if(Route::has('rendezvous.index'))
-            <a href="{{ route('rendezvous.index') }}" class="sidebar-link {{ request()->routeIs('rendezvous.*') ? 'active' : '' }}">
-                <i class="bi bi-calendar-event"></i> Rendez-vous
-            </a>
-            @endif
-        </div>
-        <div class="sidebar-section">
-            <div class="sidebar-label">Clients</div>
-            <a href="#" class="sidebar-link"><i class="bi bi-person-lines-fill"></i> Prospects</a>
-            <a href="#" class="sidebar-link"><i class="bi bi-person-check"></i> Locataires</a>
-            <a href="#" class="sidebar-link"><i class="bi bi-coin"></i> Paiements</a>
-        </div>
-        <div class="sidebar-section">
-            <div class="sidebar-label">Rapports</div>
-            <a href="#" class="sidebar-link"><i class="bi bi-bar-chart-line"></i> Performance</a>
-            <a href="#" class="sidebar-link"><i class="bi bi-file-earmark-text"></i> Documents</a>
-        </div>
-        @endif
-
-        {{-- ========================================
-             MENU : PROPRIETAIRE
-        ======================================== --}}
-        @if($user->role === 'proprietaire')
-        <div class="sidebar-section">
-            <div class="sidebar-label">Propriétaire</div>
-            <a href="{{ route('dashboard') }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                <i class="bi bi-speedometer2"></i> Vue d'ensemble
-            </a>
-            <a href="{{ route('annonces.mes-annonces') }}" class="sidebar-link {{ request()->routeIs('annonces.mes-annonces') ? 'active' : '' }}">
-                <i class="bi bi-building"></i> Mes propriétés
-                <span class="link-badge">{{ $stats['total_biens'] ?? 0 }}</span>
-            </a>
-            <a href="{{ route('annonces.create') }}" class="sidebar-link {{ request()->routeIs('annonces.create') ? 'active' : '' }}">
-                <i class="bi bi-plus-circle"></i> Publier une annonce
-            </a>
-        </div>
-        <div class="sidebar-section">
-            <div class="sidebar-label">Gestion</div>
-            <a href="#" class="sidebar-link {{ request()->routeIs('rendezvous.*') ? 'active' : '' }}">
-                <i class="bi bi-calendar-event"></i> Rendez-vous
-            </a>
-            <a href="#" class="sidebar-link {{ request()->routeIs('messages.*') ? 'active' : '' }}">
-                <i class="bi bi-chat-dots"></i> Messages
-                <span class="link-badge red">{{ $stats['nouveaux_messages'] ?? 0 }}</span>
-            </a>
-            <a href="#" class="sidebar-link"><i class="bi bi-person-check"></i> Mes locataires</a>
-        </div>
-        <div class="sidebar-section">
-            <div class="sidebar-label">Finances</div>
-            <a href="#" class="sidebar-link"><i class="bi bi-wallet2"></i> Revenus locatifs</a>
-            <a href="#" class="sidebar-link"><i class="bi bi-receipt"></i> Paiements</a>
-            <a href="#" class="sidebar-link"><i class="bi bi-file-earmark-text"></i> Baux</a>
-        </div>
-        @endif
-
-        {{-- ========================================
-             MENU : LOCATAIRE
-        ======================================== --}}
-        @if($user->role === 'client')
-        <div class="sidebar-section">
-            <div class="sidebar-label">Locataire</div>
-            <a href="{{ route('dashboard') }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                <i class="bi bi-speedometer2"></i> Mon espace
-            </a>
-            <a href="{{ route('annonces.index') }}" class="sidebar-link {{ request()->routeIs('annonces.index') ? 'active' : '' }}">
-                <i class="bi bi-search"></i> Chercher un bien
-            </a>
-            <a href="#" class="sidebar-link">
-                <i class="bi bi-heart"></i> Mes favoris
-                <span class="link-badge">{{ $stats['favoris_count'] ?? 0 }}</span>
-            </a>
-        </div>
-        <div class="sidebar-section">
-            <div class="sidebar-label">Communication</div>
-            <a href="#" class="sidebar-link">
-                <i class="bi bi-chat-dots"></i> Messages
-                <span class="link-badge red">{{ $stats['nouveaux_messages'] ?? 0 }}</span>
-            </a>
-            @if(Route::has('rendezvous.index'))
-            <a href="{{ route('rendezvous.index') }}" class="sidebar-link {{ request()->routeIs('rendezvous.*') ? 'active' : '' }}">
-                <i class="bi bi-calendar-event"></i> Mes visites
-            </a>
-            @endif
-        </div>
-        <div class="sidebar-section">
-            <div class="sidebar-label">Mon logement</div>
-            <a href="#" class="sidebar-link"><i class="bi bi-file-earmark-text"></i> Mon bail</a>
-            <a href="#" class="sidebar-link"><i class="bi bi-credit-card"></i> Mes paiements</a>
-            <a href="#" class="sidebar-link"><i class="bi bi-tools"></i> Demandes de travaux</a>
-        </div>
-        @endif
-
-        <!-- Sidebar Nav Accueil -->
-        <div class="sidebar-section" style="margin-top: 1rem;">
-            <a href="{{ route('home') }}" class="sidebar-link" style="background: var(--teal-muted); border: 1px dashed var(--teal-border); justify-content: center; font-weight: 700; color: var(--teal);">
-                <i class="bi bi-house-door"></i> Retour à l'accueil
-            </a>
-        </div>
-
-        <!-- Footer sidebar -->
-        <div class="sidebar-footer">
-            <div class="sidebar-usage">
-                <div class="sidebar-usage-label">
-                    Biens publiés
-                    <span>{{ $stats['total_biens'] ?? 0 }} / {{ $stats['max_biens'] ?? 10 }}</span>
-                </div>
-                <div class="usage-bar">
-                    <div class="usage-bar-fill" style="width: {{ min(100, (($stats['total_biens'] ?? 0) / ($stats['max_biens'] ?? 10)) * 100) }}%"></div>
-                </div>
-            </div>
-        </div>
-    </aside>
-
-
-    <!-- ===== MAIN CONTENT ===== -->
-    <main class="main">
-
-        <!-- Flash Messages -->
-        @if(session('success'))
-        <div class="alert alert-success">
-            <i class="bi bi-check-circle-fill"></i>
-            <span>{{ session('success') }}</span>
-        </div>
-        @endif
-
-        @if(session('error'))
-        <div class="alert alert-danger">
-            <i class="bi bi-x-circle-fill"></i>
-            <span>{{ session('error') }}</span>
-        </div>
-        @endif
-
-        <!-- Page Header -->
-        <div class="page-header">
-            <div class="page-header-row">
-                <div>
-                    <h1>Bienvenue, <em>{{ explode(' ', $user->name)[0] }}</em></h1>
-                    <p>
-                        @if($user->estAdmin())
-                        Gérez la plateforme LocaTribe depuis votre espace administrateur
-                        @elseif($user->role === 'agence')
-                        Gérez vos biens et suivez l'activité de votre agence
-                        @elseif($user->role === 'proprietaire')
-                        Suivez vos propriétés et gérez vos locations
-                        @else
-                        Trouvez votre prochain logement et gérez vos visites
-                        @endif
-                    </p>
-                </div>
-                <div style="display: flex; gap: 0.7rem; align-items: center;">
-                    @if($user->role !== 'locataire')
-                    <a href="{{ route('annonces.create') }}" class="btn btn-primary">
-                        <i class="bi bi-plus-lg"></i> Nouveau bien
-                    </a>
-                    @else
-                    <a href="{{ route('annonces.index') }}" class="btn btn-primary">
-                        <i class="bi bi-search"></i> Parcourir les biens
-                    </a>
-                    @endif
-                </div>
-            </div>
-        </div>
-
-        <!-- ===== STATS ===== -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-card-row">
-                    <div class="stat-icon teal"><i class="bi bi-building"></i></div>
-                    <span class="stat-change">+{{ $stats['biens_publies'] ?? 0 }}</span>
-                </div>
-                <div class="stat-value">{{ $stats['total_biens'] ?? 0 }}</div>
-                <div class="stat-label">
-                    @if($user->role === 'locataire') Biens sauvegardés @else Biens publiés @endif
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-card-row">
-                    <div class="stat-icon primary"><i class="bi bi-chat-dots"></i></div>
-                    <span class="stat-change">+{{ $stats['nouveaux_messages'] ?? 0 }}</span>
-                </div>
-                <div class="stat-value">{{ $stats['total_messages'] ?? 0 }}</div>
-                <div class="stat-label">Messages reçus</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-card-row">
-                    <div class="stat-icon teal-light"><i class="bi bi-calendar-check"></i></div>
-                    <span class="stat-change">{{ $stats['rdv_a_venir'] ?? 0 }} à venir</span>
-                </div>
-                <div class="stat-value">{{ $stats['total_rdv'] ?? 0 }}</div>
-                <div class="stat-label">Rendez-vous</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-card-row">
-                    <div class="stat-icon green"><i class="bi bi-eye"></i></div>
-                    <span class="stat-change">+{{ $stats['vues_cette_semaine'] ?? 0 }}%</span>
-                </div>
-                <div class="stat-value">{{ number_format($stats['total_vues'] ?? 0) }}</div>
-                <div class="stat-label">Vues totales</div>
-            </div>
-        </div>
-
-        <!-- Admin Stats -->
-        @if($user->estAdmin() && isset($stats['total_users']))
-        <div class="stats-grid" style="margin-top: -0.75rem;">
-            <div class="stat-card">
-                <div class="stat-card-row">
-                    <div class="stat-icon primary"><i class="bi bi-people"></i></div>
-                </div>
-                <div class="stat-value">{{ $stats['total_users'] }}</div>
-                <div class="stat-label">Utilisateurs</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-card-row">
-                    <div class="stat-icon teal"><i class="bi bi-person-check"></i></div>
-                </div>
-                <div class="stat-value">{{ $stats['users_actifs'] }}</div>
-                <div class="stat-label">Actifs</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-card-row">
-                    <div class="stat-icon teal-light"><i class="bi bi-shop"></i></div>
-                </div>
-                <div class="stat-value">{{ $stats['total_agences'] ?? 0 }}</div>
-                <div class="stat-label">Agences</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-card-row">
-                    <div class="stat-icon green"><i class="bi bi-graph-up-arrow"></i></div>
-                </div>
-                <div class="stat-value">{{ $stats['total_transactions'] ?? 0 }}</div>
-                <div class="stat-label">Transactions</div>
-            </div>
-        </div>
-        @endif
-
-        <!-- ===== ACTIONS RAPIDES ===== -->
-        <div class="card" style="margin-bottom: 1.75rem;">
-            <div class="card-header">
-                <span class="card-title"><i class="bi bi-lightning-charge-fill"></i> Actions rapides</span>
-            </div>
-            <div class="action-row">
-                @if($user->role === 'locataire')
-                <a href="{{ route('annonces.index') }}" class="action-card">
-                    <i class="bi bi-search"></i>
-                    <div class="action-title">Chercher</div>
-                    <div class="action-desc">Trouver un bien</div>
-                </a>
-                <a href="#" class="action-card">
-                    <i class="bi bi-heart"></i>
-                    <div class="action-title">Favoris</div>
-                    <div class="action-desc">Biens sauvegardés</div>
-                </a>
+    {{-- En-tête du Dashboard --}}
+    <header class="dash-header">
+        <div class="dash-header-info">
+            <div class="dash-role-badge">
+                @if($user->estAdmin())
+                    <i class="bi bi-shield-check" aria-hidden="true"></i>
+                    <span>Administrateur Système</span>
+                @elseif($user->role === 'agence')
+                    <i class="bi bi-building" aria-hidden="true"></i>
+                    <span>Agence Immobilière Agréée</span>
+                @elseif($user->role === 'proprietaire')
+                    <i class="bi bi-key" aria-hidden="true"></i>
+                    <span>Propriétaire Bailleur</span>
                 @else
-                <a href="{{ route('annonces.create') }}" class="action-card">
-                    <i class="bi bi-plus-circle"></i>
-                    <div class="action-title">Nouveau bien</div>
-                    <div class="action-desc">Créer une annonce</div>
-                </a>
-                <a href="{{ route('annonces.mes-annonces') }}" class="action-card">
-                    <i class="bi bi-building"></i>
-                    <div class="action-title">Mes biens</div>
-                    <div class="action-desc">Gérer mes annonces</div>
-                </a>
+                    <i class="bi bi-person" aria-hidden="true"></i>
+                    <span>Espace Client / Acquéreur</span>
                 @endif
-                <a href="#" class="action-card">
-                    <i class="bi bi-chat-dots"></i>
-                    <div class="action-title">Messages</div>
-                    <div class="action-desc">Voir les messages</div>
+            </div>
+
+            <h1 class="dash-title">
+                Bienvenue, <em>{{ explode(' ', $user->name)[0] }}</em>
+            </h1>
+
+            <p class="dash-subtitle">
+                @if($user->estAdmin())
+                    Supervision globale de la plateforme ImmoPro, suivi des biens et gestion des utilisateurs en Côte d'Ivoire.
+                @elseif($user->role === 'agence')
+                    Gérez votre portefeuille de mandats immobiliers, vos annonces et suivez les demandes de contact de vos prospects.
+                @elseif($user->role === 'proprietaire')
+                    Administrez vos propriétés à Korhogo et dans toute la région, analysez vos consultations et vos visites.
+                @else
+                    Retrouvez votre historique de recherche, vos demandes d'information et vos biens enregistrés.
+                @endif
+            </p>
+        </div>
+
+        <div class="dash-header-actions">
+           
+            @if($user->peutPublierAnnonce())
+                <a href="{{ route('annonces.create') }}" class="btn btn-cta">
+                    <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                    <span>Nouveau bien</span>
                 </a>
-                <a href="#" class="action-card">
-                    <i class="bi bi-calendar-event"></i>
-                    <div class="action-title">
-                        @if($user->role === 'locataire') Mes visites @else Rendez-vous @endif
+            @else
+                <a href="{{ route('annonces.index') }}" class="btn btn-primary">
+                    <i class="bi bi-search" aria-hidden="true"></i>
+                    <span>Consulter les annonces</span>
+                </a>
+            @endif
+        </div>
+    </header>
+
+    {{-- Navigation interne / Onglets rapides --}}
+    <nav class="dash-tabs" aria-label="Navigation du tableau de bord">
+        <a href="{{ route('dashboard') }}" class="dash-tab-link active">
+            <i class="bi bi-grid-fill" aria-hidden="true"></i>
+            <span>Vue d'ensemble</span>
+        </a>
+        @if($user->peutPublierAnnonce())
+        <a href="{{ route('annonces.mes-annonces') }}" class="dash-tab-link">
+            <i class="bi bi-building" aria-hidden="true"></i>
+            <span>Mes annonces ({{ $stats['total_biens'] ?? 0 }})</span>
+        </a>
+        <a href="{{ route('annonces.create') }}" class="dash-tab-link">
+            <i class="bi bi-plus-circle" aria-hidden="true"></i>
+            <span>Déposer une annonce</span>
+        </a>
+        @else
+        <a href="{{ route('annonces.index') }}" class="dash-tab-link">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <span>Rechercher un bien</span>
+        </a>
+        @endif
+        @if($user->estAdmin())
+            <a href="{{ route('admin.biens.index') }}" class="dash-tab-link">
+                <i class="bi bi-collection" aria-hidden="true"></i>
+                <span>Catalogue Global</span>
+            </a>
+            <a href="{{ route('admin.users.index') }}" class="dash-tab-link">
+                <i class="bi bi-people" aria-hidden="true"></i>
+                <span>Utilisateurs</span>
+            </a>
+            <a href="{{ route('admin.agences.index') }}" class="dash-tab-link">
+                <i class="bi bi-shop" aria-hidden="true"></i>
+                <span>Agences</span>
+            </a>
+        @endif
+        <a href="{{ route('profile.edit') }}" class="dash-tab-link">
+            <i class="bi bi-gear" aria-hidden="true"></i>
+            <span>Mon Profil</span>
+        </a>
+    </nav>
+
+    {{-- Indicateurs Clés de Performance (KPI) --}}
+    <section aria-labelledby="kpi-heading">
+        <h2 id="kpi-heading" class="visually-hidden" style="position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">Indicateurs clés</h2>
+        <div class="kpi-grid">
+            {{-- KPI 1 : Biens publiés --}}
+            <div class="kpi-card">
+                <div class="kpi-card-header">
+                    <div class="kpi-icon-wrap primary" aria-hidden="true">
+                        <i class="bi bi-building"></i>
                     </div>
-                    <div class="action-desc">Planning</div>
-                </a>
-                <a href="{{ route('home') }}" class="action-card" style="border-style: dashed; border-color: var(--teal-border);">
-                    <i class="bi bi-house-door"></i>
-                    <div class="action-title">Accueil</div>
-                    <div class="action-desc">Retour au site</div>
-                </a>
+                    <span class="kpi-pill success tabular-nums">+{{ $stats['biens_publies'] ?? 0 }} en ligne</span>
+                </div>
+                <div class="kpi-value tabular-nums">{{ $stats['total_biens'] ?? 0 }}</div>
+                <div class="kpi-label">Biens publiés</div>
+            </div>
+
+            {{-- KPI 2 : Vues totales --}}
+            <div class="kpi-card">
+                <div class="kpi-card-header">
+                    <div class="kpi-icon-wrap cta" aria-hidden="true">
+                        <i class="bi bi-eye"></i>
+                    </div>
+                    <span class="kpi-pill tabular-nums">+{{ $stats['vues_cette_semaine'] ?? 0 }}% sem.</span>
+                </div>
+                <div class="kpi-value tabular-nums">{{ number_format($stats['total_vues'] ?? 0, 0, ',', ' ') }}</div>
+                <div class="kpi-label">Vues totales</div>
+            </div>
+
+            {{-- KPI 3 : Messages reçus --}}
+            <div class="kpi-card">
+                <div class="kpi-card-header">
+                    <div class="kpi-icon-wrap slate" aria-hidden="true">
+                        <i class="bi bi-chat-dots"></i>
+                    </div>
+                    <span class="kpi-pill tabular-nums">+{{ $stats['nouveaux_messages'] ?? 0 }} récents</span>
+                </div>
+                <div class="kpi-value tabular-nums">{{ $stats['total_messages'] ?? 0 }}</div>
+                <div class="kpi-label">Messages reçus</div>
+            </div>
+
+            {{-- KPI 4 : Réservations séjours (Hôtels & Résidences) --}}
+            <div class="kpi-card">
+                <div class="kpi-card-header">
+                    <div class="kpi-icon-wrap cta" aria-hidden="true">
+                        <i class="bi bi-moon-stars-fill"></i>
+                    </div>
+                    <span class="kpi-pill tabular-nums">{{ $stats['reservations_en_attente'] ?? 0 }} en attente</span>
+                </div>
+                <div class="kpi-value tabular-nums">{{ $stats['total_reservations'] ?? 0 }}</div>
+                <div class="kpi-label">Réservations séjours</div>
             </div>
         </div>
 
-        <!-- ===== CONTENT GRID ===== -->
-        <div class="content-grid">
-
-            <!-- Activité récente -->
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title"><i class="bi bi-clock-history"></i> Activité récente</span>
+        {{-- Statistiques Système Supplémentaires pour Administrateur --}}
+        @if($user->estAdmin() && isset($stats['total_users']))
+        <div class="kpi-grid" style="margin-top: -0.75rem;">
+            <div class="kpi-card">
+                <div class="kpi-card-header">
+                    <div class="kpi-icon-wrap primary" aria-hidden="true"><i class="bi bi-people"></i></div>
+                    <span class="kpi-pill tabular-nums">{{ $stats['users_actifs'] ?? 0 }} actifs</span>
                 </div>
-                <ul class="activity-list">
-                    @forelse($recentActivities ?? [] as $activity)
-                    <li class="activity-item">
-                        <div class="activity-dot {{ $activity['color'] ?? 'teal' }}"></div>
-                        <div class="activity-content">
-                            <div class="activity-text">{{ $activity['text'] ?? '' }}</div>
-                            <div class="activity-time">{{ $activity['time'] ?? '' }}</div>
-                        </div>
-                    </li>
-                    @empty
-                    <li class="activity-item">
-                        <div class="activity-dot teal"></div>
-                        <div class="activity-content">
-                            <div class="activity-text">Aucune activité récente</div>
-                            <div class="activity-time">Commencez à explorer</div>
-                        </div>
-                    </li>
-                    @endforelse
-                </ul>
+                <div class="kpi-value tabular-nums">{{ $stats['total_users'] }}</div>
+                <div class="kpi-label">Utilisateurs inscrits</div>
             </div>
 
-            <!-- Messages récents -->
-            <div class="card" style="animation-delay: 0.3s;">
-                <div class="card-header">
-                    <span class="card-title"><i class="bi bi-chat-square-text"></i> Messages récents</span>
-                    <a href="#" class="card-link">Tout voir</a>
+            <div class="kpi-card">
+                <div class="kpi-card-header">
+                    <div class="kpi-icon-wrap slate" aria-hidden="true"><i class="bi bi-shop"></i></div>
+                    <span class="kpi-pill tabular-nums">Partenaires</span>
                 </div>
-                <ul class="activity-list">
-                    @forelse($recentMessages ?? [] as $message)
-                    <li class="activity-item">
-                        <div class="activity-dot {{ ($message['lu'] ?? false) ? 'teal' : 'orange' }}"></div>
-                        <div class="activity-content">
-                            <div class="activity-text">
-                                <strong>{{ $message['sender'] ?? 'Inconnu' }}</strong>
-                                — {{ Str::limit($message['contenu'] ?? '', 55) }}
+                <div class="kpi-value tabular-nums">{{ $stats['total_agences'] ?? 0 }}</div>
+                <div class="kpi-label">Agences certifiées</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-card-header">
+                    <div class="kpi-icon-wrap success" aria-hidden="true"><i class="bi bi-check2-circle"></i></div>
+                    <span class="kpi-pill success tabular-nums">Finalisées</span>
+                </div>
+                <div class="kpi-value tabular-nums">{{ $stats['total_transactions'] ?? 0 }}</div>
+                <div class="kpi-label">Transactions conclues</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-card-header">
+                    <div class="kpi-icon-wrap cta" aria-hidden="true"><i class="bi bi-shield-lock"></i></div>
+                    <span class="kpi-pill tabular-nums">Sécurité</span>
+                </div>
+                <div class="kpi-value tabular-nums">100%</div>
+                <div class="kpi-label">Plateforme certifiée</div>
+            </div>
+        </div>
+        @endif
+    </section>
+
+    {{-- Grille d'actions rapides --}}
+    <div class="actions-grid">
+        @if($user->peutPublierAnnonce())
+            <a href="{{ route('annonces.create') }}" class="action-tile">
+                <div class="action-tile-icon" aria-hidden="true"><i class="bi bi-plus-lg"></i></div>
+                <div class="action-tile-content">
+                    <span class="action-tile-title">Nouveau bien</span>
+                    <span class="action-tile-desc">Publier une annonce</span>
+                </div>
+            </a>
+            <a href="{{ route('annonces.mes-annonces') }}" class="action-tile">
+                <div class="action-tile-icon" aria-hidden="true"><i class="bi bi-collection"></i></div>
+                <div class="action-tile-content">
+                    <span class="action-tile-title">Mes annonces</span>
+                    <span class="action-tile-desc">Gérer mon portefeuille</span>
+                </div>
+            </a>
+        @else
+            <a href="{{ route('annonces.index') }}" class="action-tile">
+                <div class="action-tile-icon" aria-hidden="true"><i class="bi bi-search"></i></div>
+                <div class="action-tile-content">
+                    <span class="action-tile-title">Catalogue</span>
+                    <span class="action-tile-desc">Trouver un logement</span>
+                </div>
+            </a>
+        @endif
+
+        @if($user->estAdmin())
+            <a href="{{ route('admin.users.index') }}" class="action-tile">
+                <div class="action-tile-icon" aria-hidden="true"><i class="bi bi-people"></i></div>
+                <div class="action-tile-content">
+                    <span class="action-tile-title">Gestion des utilisateurs</span>
+                    <span class="action-tile-desc">Gérer les comptes</span>
+                </div>
+            </a>
+
+            <a href="{{ route('admin.agences.index') }}" class="action-tile">
+                <div class="action-tile-icon" aria-hidden="true"><i class="bi bi-buildings"></i></div>
+                <div class="action-tile-content">
+                    <span class="action-tile-title">Gestion des agences</span>
+                    <span class="action-tile-desc">Gérer les agences</span>
+                </div>
+            </a>
+        @endif
+
+        <a href="{{ route('profile.edit') }}" class="action-tile">
+            <div class="action-tile-icon" aria-hidden="true"><i class="bi bi-person-gear"></i></div>
+            <div class="action-tile-content">
+                <span class="action-tile-title">Mon Profil</span>
+                <span class="action-tile-desc">Coordonnées et sécurité</span>
+            </div>
+        </a>
+    </div>
+
+    {{-- Tableau des Demandes de Réservations Court Séjour (Hôtels & Résidences) --}}
+    @if($user->peutPublierAnnonce() && isset($reservationsRecues) && $reservationsRecues->isNotEmpty())
+    <div class="dash-card">
+        <div class="dash-card-header">
+            <h3 class="dash-card-title">
+                <i class="bi bi-calendar-check" aria-hidden="true"></i>
+                <span>Demandes de Réservations (Hôtels &amp; Résidences)</span>
+                @if(($stats['reservations_en_attente'] ?? 0) > 0)
+                <span class="badge-pill warning" style="font-size: 0.72rem; padding: 0.2rem 0.55rem; background-color: var(--status-warning-bg); color: var(--status-warning-text); border: 1px solid var(--status-warning-border); border-radius: var(--radius-full); font-weight: 700;">
+                    {{ $stats['reservations_en_attente'] }} en attente
+                </span>
+                @endif
+            </h3>
+        </div>
+
+        <div class="table-container">
+            <table class="dash-table">
+                <thead>
+                    <tr>
+                        <th>Réf</th>
+                        <th>Hébergement</th>
+                        <th>Voyageur</th>
+                        <th>Dates séjour</th>
+                        <th>Personnes</th>
+                        <th>Montant estimé</th>
+                        <th>Statut</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($reservationsRecues as $res)
+                    <tr>
+                        <td>
+                            <span class="tabular-nums" style="font-weight: 700; color: var(--color-primary);">
+                                #{{ $res->id }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{{ route('annonces.show', $res->id_annonce) }}" style="font-weight: 600; color: var(--color-primary); text-decoration: none;">
+                                {{ Str::limit($res->annonce->titre, 28) }}
+                            </a>
+                        </td>
+                        <td>
+                            <div>
+                                <strong style="display: block; font-size: 0.85rem; color: var(--color-primary);">{{ $res->nom_client }}</strong>
+                                <span class="tabular-nums" style="font-size: 0.75rem; color: var(--color-secondary);">{{ $res->telephone }}</span>
                             </div>
-                            <div class="activity-time">{{ $message['time'] ?? '' }}</div>
-                        </div>
-                    </li>
+                        </td>
+                        <td>
+                            <div style="font-size: 0.8rem;">
+                                <div class="tabular-nums">{{ $res->periode_formatee }}</div>
+                                <span style="font-size: 0.72rem; color: var(--color-secondary);">{{ $res->nombre_nuits }} nuit(s)</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="tabular-nums" style="font-size: 0.85rem;">{{ $res->nombre_personnes }} pers.</span>
+                        </td>
+                        <td>
+                            <strong class="tabular-nums" style="color: var(--color-cta); font-size: 0.92rem;">
+                                {{ $res->prix_total_formate }}
+                            </strong>
+                        </td>
+                        <td>
+                            <span class="status-pill {{ $res->statut === 'confirmee' ? 'badge-teal' : ($res->statut === 'en_attente' ? 'badge-muted' : 'badge-danger') }}">
+                                <span class="status-dot"></span>
+                                <span>{{ $res->statut_label }}</span>
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            <div class="table-actions" style="justify-content: flex-end; gap: 0.35rem;">
+                                @if($res->statut === 'en_attente')
+                                <form action="{{ route('reservations.update-statut', $res) }}" method="POST" style="display: inline;">
+                                    @csrf
+                                    @method('PATCH')
+                                    <input type="hidden" name="statut" value="confirmee">
+                                    <button type="submit" class="btn btn-sm btn-primary" title="Confirmer la réservation" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;">
+                                        <i class="bi bi-check-lg"></i> Valider
+                                    </button>
+                                </form>
+                                <form action="{{ route('reservations.update-statut', $res) }}" method="POST"
+                                    data-confirm="Souhaitez-vous refuser cette demande de réservation pour « {{ $res->annonce->titre ?? 'cette annonce' }} » ?"
+                                    data-confirm-title="Refuser la réservation"
+                                    data-confirm-btn="Refuser la demande"
+                                    data-confirm-danger="false"
+                                    data-confirm-warning="Le client sera notifié du refus de sa demande."
+                                    style="display: inline;">
+                                    @csrf
+                                    @method('PATCH')
+                                    <input type="hidden" name="statut" value="refusee">
+                                    <button type="submit" class="btn btn-sm btn-secondary" title="Refuser" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </form>
+                                @endif
+
+                                @if($res->telephone)
+                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $res->telephone) }}?text=Bonjour%20{{ urlencode($res->nom_client) }},%20suite%20à%20votre%20demande%20de%20réservation%20#{{ $res->id }}%20pour%20«%20{{ urlencode($res->annonce->titre) }}%20»..."
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="btn-action-icon"
+                                    title="Échanger sur WhatsApp"
+                                    style="color: #25D366;">
+                                    <i class="bi bi-whatsapp"></i>
+                                </a>
+                                <a href="tel:{{ $res->telephone }}" class="btn-action-icon" title="Appeler le voyageur">
+                                    <i class="bi bi-telephone"></i>
+                                </a>
+                                @endif
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
+    {{-- Tableau des Biens Récents --}}
+    @if($user->peutPublierAnnonce())
+    <div class="dash-card">
+        <div class="dash-card-header">
+            <h3 class="dash-card-title">
+                <i class="bi bi-building" aria-hidden="true"></i>
+                <span>Vos biens récents</span>
+            </h3>
+            <a href="{{ route('annonces.mes-annonces') }}" class="dash-card-link">
+                <span>Tous mes biens</span>
+                <i class="bi bi-arrow-right" aria-hidden="true"></i>
+            </a>
+        </div>
+
+        <div class="table-container">
+            <table class="pro-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Bien & Emplacement</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Tarif</th>
+                        <th scope="col">Statut</th>
+                        <th scope="col">Consultations</th>
+                        <th scope="col">Date</th>
+                        <th scope="col" style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($recentBiens ?? [] as $bien)
+                    <tr>
+                        <td>
+                            <a href="{{ route('annonces.show', $bien['id']) }}" class="bien-meta-title">
+                                {{ Str::limit($bien['titre'] ?? '', 40) }}
+                            </a>
+                            <span class="bien-meta-location">
+                                <i class="bi bi-geo-alt" aria-hidden="true"></i>
+                                {{ $bien['ville'] ?? 'Korhogo' }}
+                            </span>
+                        </td>
+                        <td>
+                            <span style="font-weight: 600; color: var(--color-secondary);">
+                                {{ ucfirst($bien['type'] ?? 'Maison') }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="price-cell tabular-nums">
+                                {{ number_format((float) ($bien['prix'] ?? 0), 0, ',', ' ') }} FCFA
+                            </span>
+                        </td>
+                        <td>
+                            @php
+                                $isPublie = ($bien['statut'] ?? '') === 'Publiée' || ($bien['statut'] ?? '') === 'active';
+                            @endphp
+                            <span class="status-badge {{ $isPublie ? 'active' : 'muted' }}">
+                                <span class="status-dot"></span>
+                                <span>{{ $bien['statut'] ?? 'Publiée' }}</span>
+                            </span>
+                        </td>
+                        <td>
+                            <span class="tabular-nums" style="font-weight: 600; color: var(--color-primary);">
+                                {{ $bien['vues'] ?? 0 }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="tabular-nums" style="font-size: 0.8125rem; color: var(--color-secondary);">
+                                {{ $bien['date'] ?? '' }}
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            <div class="table-actions" style="justify-content: flex-end;">
+                                <a href="{{ route('annonces.show', $bien['id']) }}" class="btn-action-icon" title="Voir l'annonce">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ route('annonces.edit', $bien['id']) }}" class="btn-action-icon" title="Modifier l'annonce">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form action="{{ route('annonces.destroy', $bien['id']) }}" method="POST"
+                                    data-confirm="Êtes-vous sûr de vouloir supprimer définitivement l'annonce « {{ $bien['titre'] }} » ?"
+                                    data-confirm-title="Supprimer l'annonce"
+                                    data-confirm-btn="Supprimer définitivement"
+                                    data-confirm-warning="Cette annonce et ses photos seront retirées immédiatement de la plateforme."
+                                    style="margin: 0; display: inline;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn-action-icon danger" title="Supprimer l'annonce">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
                     @empty
-                    <li class="activity-item">
-                        <div class="activity-dot orange"></div>
-                        <div class="activity-content">
-                            <div class="activity-text">Aucun message récent</div>
-                            <div class="activity-time">Vos messages apparaîtront ici</div>
-                        </div>
-                    </li>
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <div class="empty-state-icon" aria-hidden="true"><i class="bi bi-building-add"></i></div>
+                                <h4 class="empty-state-title">Aucun bien publié pour le moment</h4>
+                                <p class="empty-state-desc">Vous n'avez pas encore d'annonce répertoriée dans votre portefeuille immobilier.</p>
+                                <a href="{{ route('annonces.create') }}" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                                    <span>Déposer mon premier bien</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
                     @endforelse
-                </ul>
-            </div>
-
-            <!-- Biens récents (sauf locataire) -->
-            @if($user->role !== 'locataire')
-            <div class="card full-width" style="animation-delay: 0.35s;">
-                <div class="card-header">
-                    <span class="card-title"><i class="bi bi-building"></i> Vos biens récents</span>
-                    <a href="{{ route('annonces.mes-annonces') }}" class="card-link">Tous mes biens</a>
-                </div>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Bien</th>
-                                <th>Type</th>
-                                <th>Prix</th>
-                                <th>Statut</th>
-                                <th>Vues</th>
-                                <th>Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($recentBiens ?? [] as $bien)
-                            <tr>
-                                <td>
-                                    <div style="font-weight: 700;">{{ Str::limit($bien['titre'] ?? '', 30) }}</div>
-                                    <div style="font-size: 0.72rem; color: var(--text-muted);">{{ $bien['ville'] ?? '' }}</div>
-                                </td>
-                                <td style="color: var(--text-secondary); font-weight: 500;">{{ ucfirst($bien['type'] ?? '') }}</td>
-                                <td style="font-weight: 800; color: var(--primary);">{{ number_format($bien['prix'] ?? 0) }} FCFA</td>
-                                <td>
-                                    <span class="badge {{ $bien['status_badge'] ?? 'badge-muted' }}">{{ $bien['statut'] ?? 'Brouillon' }}</span>
-                                </td>
-                                <td style="color: var(--text-secondary); font-weight: 600;">{{ $bien['vues'] ?? 0 }}</td>
-                                <td style="color: var(--text-muted); font-size: 0.76rem;">{{ $bien['date'] ?? '' }}</td>
-                                <td>
-                                    <div style="display: flex; gap: 0.4rem;">
-                                        <a href="{{ route('annonces.edit', $bien['id'] ?? 0) }}" class="btn-icon" title="Modifier">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <form action="{{ route('annonces.destroy', $bien['id'] ?? 0) }}" method="POST" onsubmit="return confirm('Supprimer ?')" style="margin: 0;">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn-icon danger" title="Supprimer">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="7" style="text-align: center; padding: 3rem; color: var(--text-muted);">
-                                    <i class="bi bi-building" style="font-size: 2.5rem; display: block; margin-bottom: 0.75rem; opacity: 0.4; color: var(--teal);"></i>
-                                    <span style="font-weight: 600;">Aucun bien publié pour le moment</span>
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            @endif
-
-            <!-- Prochaines visites (locataire) -->
-            @if($user->role === 'locataire')
-            <div class="card full-width" style="animation-delay: 0.35s;">
-                <div class="card-header">
-                    <span class="card-title"><i class="bi bi-calendar-check"></i> Prochaines visites</span>
-                    @if(Route::has('rendezvous.index'))
-                    <a href="{{ route('rendezvous.index') }}" class="card-link">Voir le planning</a>
-                    @endif
-                </div>
-                <div class="table-wrap">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Bien</th>
-                                <th>Adresse</th>
-                                <th>Date</th>
-                                <th>Heure</th>
-                                <th>Statut</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($upcomingVisits ?? [] as $visit)
-                            <tr>
-                                <td style="font-weight: 700;">{{ $visit['bien'] ?? '' }}</td>
-                                <td style="color: var(--text-secondary);">{{ $visit['adresse'] ?? '' }}</td>
-                                <td style="color: var(--text-secondary); font-weight: 500;">{{ $visit['date'] ?? '' }}</td>
-                                <td style="color: var(--text-secondary);">{{ $visit['heure'] ?? '' }}</td>
-                                <td>
-                                    <span class="badge {{ $visit['badge'] ?? 'badge-teal' }}">{{ $visit['statut'] ?? 'Confirmé' }}</span>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="5" style="text-align: center; padding: 3rem; color: var(--text-muted);">
-                                    <i class="bi bi-calendar-x" style="font-size: 2.5rem; display: block; margin-bottom: 0.75rem; opacity: 0.4; color: var(--teal);"></i>
-                                    <span style="font-weight: 600;">Aucune visite planifiée</span>
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            @endif
-
+                </tbody>
+            </table>
         </div>
-    </main>
+    </div>
+    @endif
 
-    <!-- Footer -->
-    <footer class="site-footer">
-        <div class="footer-text">
-            &copy; {{ date('Y') }}
-            <a href="{{ route('home') }}">LocaTribe</a>.
-            Tous droits réservés.
+    {{-- Double Colonne : Activités & Messages récents --}}
+    <div class="dual-grid">
+        {{-- Colonne 1 : Activité récente --}}
+        <div class="dash-card" style="margin-bottom: 0;">
+            <div class="dash-card-header">
+                <h3 class="dash-card-title">
+                    <i class="bi bi-clock-history" aria-hidden="true"></i>
+                    <span>Activité récente</span>
+                </h3>
+            </div>
+            <ul class="feed-list">
+                @forelse($recentActivities ?? [] as $activity)
+                <li class="feed-item">
+                    <div class="feed-bullet {{ $activity['color'] === 'teal' ? 'primary' : ($activity['color'] ?? 'primary') }}"></div>
+                    <div class="feed-content">
+                        <span class="feed-title">{{ $activity['text'] ?? '' }}</span>
+                        <span class="feed-time">{{ $activity['time'] ?? 'Récemment' }}</span>
+                    </div>
+                </li>
+                @empty
+                <li class="feed-item">
+                    <div class="feed-bullet slate"></div>
+                    <div class="feed-content">
+                        <span class="feed-title">Aucune activité récente enregistrée</span>
+                        <span class="feed-time">Votre historique apparaîtra ici</span>
+                    </div>
+                </li>
+                @endforelse
+            </ul>
         </div>
-    </footer>
 
-    <!-- Scripts -->
-    <script>
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
-            document.getElementById('sidebarOverlay').classList.toggle('show');
-        }
+        {{-- Colonne 2 : Messages récents --}}
+        <div class="dash-card" style="margin-bottom: 0;">
+            <div class="dash-card-header">
+                <h3 class="dash-card-title">
+                    <i class="bi bi-chat-square-text" aria-hidden="true"></i>
+                    <span>Messages & Contacts</span>
+                </h3>
+                @if($user->estAdmin())
+                    <a href="{{ route('contacts.index') }}" class="dash-card-link">
+                        <span>Voir tout</span>
+                        <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                    </a>
+                @endif
+            </div>
+            <ul class="feed-list">
+                @forelse($recentMessages ?? [] as $message)
+                <li class="feed-item">
+                    <div class="feed-bullet {{ ($message['lu'] ?? false) ? 'slate' : 'cta' }}"></div>
+                    <div class="feed-content">
+                        <span class="feed-title">
+                            <strong>{{ $message['sender'] ?? 'Visiteur' }}</strong> — {{ Str::limit($message['contenu'] ?? '', 60) }}
+                        </span>
+                        <span class="feed-time">{{ $message['time'] ?? 'Récemment' }}</span>
+                    </div>
+                </li>
+                @empty
+                <li class="feed-item">
+                    <div class="feed-bullet cta"></div>
+                    <div class="feed-content">
+                        <span class="feed-title">Aucun message de contact récent</span>
+                        <span class="feed-time">Les demandes de vos visiteurs s'afficheront ici</span>
+                    </div>
+                </li>
+                @endforelse
+            </ul>
+        </div>
+    </div>
 
-        function toggleUserDropdown(e) {
-            e.stopPropagation();
-            document.getElementById('userDropdown').classList.toggle('show');
-        }
-
-        document.addEventListener('click', function(e) {
-            if (!e.target.closest('.topnav-user')) {
-                document.getElementById('userDropdown').classList.remove('show');
-            }
-        });
-    </script>
-
-</body>
-
-</html>
+</div>
+@endsection

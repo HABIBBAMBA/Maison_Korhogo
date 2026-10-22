@@ -30,7 +30,10 @@
                     <i class="bi bi-pencil"></i> Modifier
                 </a>
                 <form action="{{ route('admin.agences.destroy', $agence) }}" method="POST"
-                    onsubmit="return confirm('Supprimer « {{ $agence->nom_agence }} » ?');">
+                    data-confirm="Supprimer « {{ $agence->nom_agence }} » ? Cette opération retirera l'agence et ses accès."
+                    data-confirm-title="Supprimer l'agence"
+                    data-confirm-btn="Supprimer définitivement"
+                    data-confirm-warning="Cette action est irréversible.">
                     @csrf @method('DELETE')
                     <button type="submit" class="btn btn-outline" style="font-size: 0.85rem; color: #e53935; border-color: #e53935;">
                         <i class="bi bi-trash"></i> Supprimer

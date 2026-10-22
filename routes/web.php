@@ -7,8 +7,11 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AnnonceController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReservationController;
 use App\Models\Annonce;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -33,6 +36,10 @@ Route::get('/', function () {
         'total' => Annonce::where('statut', 'active')->count(),
         'vente' => Annonce::where('statut', 'active')->where('type_offre', 'vente')->count(),
         'location' => Annonce::where('statut', 'active')->where('type_offre', 'location')->count(),
+        'court_sejour' => Annonce::where('statut', 'active')->where(function ($q) {
+            $q->where('type_offre', 'court_sejour')
+                ->orWhereIn('type_bien', ['residence_meublee', 'chambre_hotel', 'auberge']);
+        })->count(),
     ];
 
     return view('pages.home', compact('annoncesRecentes', 'heroPhotos', 'stats'));
@@ -71,15 +78,12 @@ Route::post('/logout', [AuthController::class, 'logout'])
 //  DASHBOARD (protégé)
 // ===========================
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        $user = auth()->user();
-
-        return view('pages.dashboard', compact('user'));
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::put('/password', [PasswordController::class, 'update'])->name('password.update');
 });
 
 // ═══════════════════════════════════════
@@ -93,8 +97,8 @@ Route::get('/annonces', [AnnonceController::class, 'index'])
 Route::get('/annonces/{annonce}', [AnnonceController::class, 'show'])
     ->name('annonces.show');
 
-// Pages protégées
-Route::middleware('auth')->group(function () {
+// Pages protégées de gestion des annonces (réservées aux propriétaires, agences et admins)
+Route::middleware(['auth', 'role:proprietaire,agence,admin'])->group(function () {
 
     Route::get('/mes-annonces', [AnnonceController::class, 'myAnnonces'])
         ->name('annonces.mes-annonces');
@@ -134,6 +138,21 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     Route::delete('/contacts/{contact}', [ContactController::class, 'destroy'])
         ->name('contacts.destroy');
+});
+
+// ═══════════════════════════════════════
+//  ROUTES RÉSERVATIONS (HÔTELS & RÉSIDENCES)
+// ═══════════════════════════════════════
+Route::post('/reservations', [ReservationController::class, 'store'])
+    ->name('reservations.store')
+    ->middleware('throttle:10,1');
+
+Route::middleware('auth')->group(function () {
+    Route::patch('/reservations/{reservation}/statut', [ReservationController::class, 'updateStatut'])
+        ->name('reservations.update-statut');
+
+    Route::patch('/reservations/{reservation}/annuler', [ReservationController::class, 'cancel'])
+        ->name('reservations.cancel');
 });
 
 // ═══════════════════════════════════════

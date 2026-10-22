@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\URL; // ← ajoute cette ligne
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,16 +13,9 @@ class AppServiceProvider extends ServiceProvider
         //
     }
 
-    //public function boot()
-    // {
-    //if ($this->app->environment('local')) {
-    // URL::forceScheme('https');
-    //}
-    // }
-
-
     public function boot(): void
     {
         Schema::defaultStringLength(191);
+        Paginator::defaultView('vendor.pagination.custom');
     }
 }

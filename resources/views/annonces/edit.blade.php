@@ -418,7 +418,7 @@
         {{-- Header --}}
         <div class="edit-header">
             <h1><i class="bi bi-pencil-square"></i> Modifier l'annonce</h1>
-            <a href="{{ route('annonces.show', $annonce) }}" class="btn-back">
+            <a href="{{ route('dashboard') }}" class="btn-back">
                 <i class="bi bi-arrow-left"></i> Retour
             </a>
         </div>
@@ -454,27 +454,43 @@
                     @enderror
                 </div>
 
-                <div class="field-row">
                     <div class="field">
-                        <label class="field-label">Type de bien <span class="req">*</span></label>
-                        <select name="type" class="field-select {{ $errors->has('type') ? 'has-error' : '' }}">
-                            @foreach(['maison','appartement','terrain','bureau','commerce','entrepot'] as $t)
-                            <option value="{{ $t }}" {{ old('type', $annonce->type) == $t ? 'selected' : '' }}>
-                                {{ ucfirst($t) }}
-                            </option>
-                            @endforeach
+                        <label class="field-label">Type d'offre <span class="req">*</span></label>
+                        <select name="type_offre" id="type_offre_select" class="field-select {{ $errors->has('type_offre') ? 'has-error' : '' }}">
+                            <option value="location" {{ old('type_offre', $annonce->type_offre) == 'location' ? 'selected' : '' }}>Location classique (Bail mensuel)</option>
+                            <option value="court_sejour" {{ old('type_offre', $annonce->type_offre) == 'court_sejour' ? 'selected' : '' }}>Court séjour (Résidence / Hôtel / Nuitée)</option>
+                            <option value="vente" {{ old('type_offre', $annonce->type_offre) == 'vente' ? 'selected' : '' }}>Vente</option>
                         </select>
-                        @error('type')
+                        @error('type_offre')
                         <span class="field-error">{{ $message }}</span>
                         @enderror
                     </div>
                     <div class="field">
-                        <label class="field-label">Catégorie <span class="req">*</span></label>
-                        <select name="categorie" class="field-select {{ $errors->has('categorie') ? 'has-error' : '' }}">
-                            <option value="vente" {{ old('categorie', $annonce->categorie) == 'vente' ? 'selected' : '' }}>Vente</option>
-                            <option value="location" {{ old('categorie', $annonce->categorie) == 'location' ? 'selected' : '' }}>Location</option>
+                        <label class="field-label">Type de bien <span class="req">*</span></label>
+                        <select name="type_bien" id="type_bien_select" class="field-select {{ $errors->has('type_bien') ? 'has-error' : '' }}">
+                            @php
+                            $typesDispos = [
+                                'residence_meublee' => ['label' => 'Résidence Meublée (Court séjour)', 'offres' => ['court_sejour', 'location']],
+                                'chambre_hotel' => ['label' => 'Chambre d\'Hôtel / Auberge', 'offres' => ['court_sejour']],
+                                'maison' => ['label' => 'Maison (Villa, Appartement)', 'offres' => ['location', 'vente']],
+                                'terrain' => ['label' => 'Terrain', 'offres' => ['location', 'vente']],
+                                'bureau' => ['label' => 'Bureau', 'offres' => ['location', 'vente']],
+                                'magasin' => ['label' => 'Magasin', 'offres' => ['location', 'vente']],
+                                'entrepot' => ['label' => 'Entrepôt', 'offres' => ['location', 'vente']],
+                                'autre' => ['label' => 'Autre', 'offres' => ['location', 'vente']],
+                            ];
+                            $currentType = old('type_bien', $annonce->type_bien);
+                            @endphp
+                            @foreach($typesDispos as $val => $data)
+                            <option value="{{ $val }}" data-offres="{{ implode(',', $data['offres']) }}" {{ $currentType == $val ? 'selected' : '' }}>
+                                {{ $data['label'] }}
+                            </option>
+                            @endforeach
+                            @if(!array_key_exists($currentType, $typesDispos) && $currentType)
+                            <option value="{{ $currentType }}" selected>{{ ucfirst($currentType) }}</option>
+                            @endif
                         </select>
-                        @error('categorie')
+                        @error('type_bien')
                         <span class="field-error">{{ $message }}</span>
                         @enderror
                     </div>
@@ -543,6 +559,13 @@
                             value="{{ old('nombre_salles_bain', $annonce->nombre_salles_bain) }}"
                             placeholder="0" min="0">
                     </div>
+                    <div class="field">
+                        <label class="field-label">Voyageurs max</label>
+                        <input type="number" name="capacite_voyageurs"
+                            class="field-input"
+                            value="{{ old('capacite_voyageurs', $annonce->capacite_voyageurs) }}"
+                            placeholder="Ex : 2" min="1">
+                    </div>
                 </div>
             </div>
 
@@ -598,7 +621,7 @@
             <div class="upload-zone" onclick="document.getElementById('images-input').click()">
                 <i class="bi bi-cloud-arrow-up"></i>
                 <p>Cliquez ici pour ajouter de nouvelles photos</p>
-                <span>JPG, PNG, WEBP — Max 2 Mo chacune</span>
+                <span>JPG, PNG, WEBP — Max 10 Mo chacune</span>
             </div>
             <input type="file" id="images-input" name="images[]" multiple accept="image/*"
                 style="display:none;" onchange="previewImages(this)">
@@ -632,6 +655,41 @@
             });
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeOffreSelect = document.getElementById('type_offre_select');
+        const typeBienSelect = document.getElementById('type_bien_select');
+
+        if (typeOffreSelect && typeBienSelect) {
+            function filterTypeBienOptions() {
+                const offre = typeOffreSelect.value;
+                let currentSelectedValid = false;
+                let firstValidOption = null;
+
+                Array.from(typeBienSelect.options).forEach(opt => {
+                    const offresStr = opt.getAttribute('data-offres');
+                    if (!offresStr) return;
+                    const allowed = offresStr.split(',').map(s => s.trim());
+                    if (allowed.includes(offre)) {
+                        opt.hidden = false;
+                        opt.disabled = false;
+                        if (!firstValidOption) firstValidOption = opt;
+                        if (opt.value === typeBienSelect.value) currentSelectedValid = true;
+                    } else {
+                        opt.hidden = true;
+                        opt.disabled = true;
+                    }
+                });
+
+                if (!currentSelectedValid && firstValidOption) {
+                    typeBienSelect.value = firstValidOption.value;
+                }
+            }
+
+            typeOffreSelect.addEventListener('change', filterTypeBienOptions);
+            filterTypeBienOptions();
+        }
+    });
 </script>
 @endpush
 @endsection

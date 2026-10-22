@@ -42,4 +42,4 @@ class Bien extends Model
     {
         return $this->hasMany(Contact::class, 'id_bien');
     }
-};
+}

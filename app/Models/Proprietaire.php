@@ -10,6 +10,7 @@ class Proprietaire extends Model
         'nom',
         'prenom',
         'telephone',
+        'adresse',
         'id_user',
     ];
 

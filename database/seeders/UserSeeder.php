@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use App\Models\Agence;
-use App\Models\Proprietaire;
 use App\Models\Client;
+use App\Models\Proprietaire;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -15,58 +15,58 @@ class UserSeeder extends Seeder
     {
         // === ADMIN ===
         $admin = User::create([
-            'name'     => 'Admin',
-            'email'    => 'admin@immobilier.com',
+            'name' => 'Admin',
+            'email' => 'admin@immobilier.com',
             'password' => Hash::make('password'),
-            'role'     => 'admin',
+            'role' => 'admin',
         ]);
 
         // === AGENCE ===
         $agenceUser = User::create([
-            'name'     => 'Immobilier Plus',
-            'email'    => 'agence@immobilier.com',
+            'name' => 'Immobilier Plus',
+            'email' => 'agence@immobilier.com',
             'password' => Hash::make('password'),
-            'role'     => 'agence',
+            'role' => 'agence',
         ]);
 
         Agence::create([
             'nom_agence' => 'Immobilier Plus',
-            'telephone'  => '+225 0700000001',
-            'adresse'    => 'Abidjan, Plateau',
+            'telephone' => '+225 0700000001',
+            'adresse' => 'Abidjan, Plateau',
             'nom_responsable' => 'Nom du responsable',
-            'logo'       => null,
-            'id_user'    => $agenceUser->id,
+            'logo' => null,
+            'id_user' => $agenceUser->id,
         ]);
 
         // === PROPRIETAIRE ===
         $proprioUser = User::create([
-            'name'     => 'Moussa Koné',
-            'email'    => 'proprietaire@immobilier.com',
+            'name' => 'Moussa Koné',
+            'email' => 'proprietaire@immobilier.com',
             'password' => Hash::make('password'),
-            'role'     => 'proprietaire',
+            'role' => 'proprietaire',
         ]);
 
         Proprietaire::create([
-            'nom'       => 'Koné',
-            'prenom'    => 'Moussa',
+            'nom' => 'Koné',
+            'prenom' => 'Moussa',
             'telephone' => '+225 0700000002',
-            'adresse'   => 'Abidjan, Cocody',
-            'id_user'   => $proprioUser->id,
+            'adresse' => 'Abidjan, Cocody',
+            'id_user' => $proprioUser->id,
         ]);
 
         // === CLIENT ===
         $clientUser = User::create([
-            'name'     => 'Aminata Diallo',
-            'email'    => 'client@immobilier.com',
+            'name' => 'Aminata Diallo',
+            'email' => 'client@immobilier.com',
             'password' => Hash::make('password'),
-            'role'     => 'client',
+            'role' => 'client',
         ]);
 
         Client::create([
-            'nom'       => 'Diallo',
-            'prenom'    => 'Aminata',
+            'nom' => 'Diallo',
+            'prenom' => 'Aminata',
             'telephone' => '+225 0700000003',
-            'id_user'   => $clientUser->id,
+            'id_user' => $clientUser->id,
         ]);
     }
 }

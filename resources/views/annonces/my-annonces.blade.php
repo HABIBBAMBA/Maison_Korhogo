@@ -60,22 +60,24 @@
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        padding: 0.7rem 1.4rem;
-        background: linear-gradient(135deg, #0d9488, #0f766e);
+        padding: 0.65rem 1.25rem;
+        background: var(--accent-brand);
         color: #fff;
-        border: none;
-        border-radius: 10px;
+        border: 1px solid var(--accent-brand);
+        border-radius: var(--radius-sm);
         font-family: inherit;
         font-size: 0.88rem;
         font-weight: 700;
         text-decoration: none;
-        transition: all 0.25s ease;
-        box-shadow: 0 3px 12px rgba(13, 148, 136, 0.3);
+        transition: all 0.2s var(--ease-out-expo);
+        box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.15), var(--shadow-raised);
     }
 
     .btn-add:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(13, 148, 136, 0.35);
+        background: var(--accent-brand-hover);
+        border-color: var(--accent-brand-hover);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-card);
     }
 
     /* ─── Grid ─── */
@@ -164,11 +166,8 @@
     .card-image::after {
         content: '';
         position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 50%;
-        background: linear-gradient(to top, rgba(0, 0, 0, 0.45), transparent);
+        inset: 0;
+        border-bottom: 1px solid var(--border-subtle);
         pointer-events: none;
     }
 
@@ -599,7 +598,10 @@
                     <i class="bi bi-pencil-square"></i> Modifier
                 </a>
                 <form action="{{ route('annonces.destroy', $annonce) }}" method="POST"
-                    onsubmit="return confirm('Supprimer cette annonce ?')">
+                    data-confirm="Êtes-vous sûr de vouloir supprimer définitivement votre annonce « {{ $annonce->titre }} » ?"
+                    data-confirm-title="Supprimer l'annonce"
+                    data-confirm-btn="Supprimer l'annonce"
+                    data-confirm-warning="Cette action retirera le bien du catalogue et supprimera toutes les demandes de réservation associées.">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="act-del">

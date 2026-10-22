@@ -7,7 +7,7 @@
 
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
         <div>
-            <a href="{{ route('admin.dashboard') }}" style="font-size: 0.85rem; color: #888; text-decoration: none;">
+            <a href="{{ route('dashboard') }}" style="font-size: 0.85rem; color: #888; text-decoration: none;">
                 <i class="bi bi-arrow-left"></i> Administration
             </a>
             <h1 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.5rem; font-weight: 800; margin-top: 0.5rem;">
@@ -106,7 +106,10 @@
                     <i class="bi bi-pencil"></i>
                 </a>
                 <form action="{{ route('admin.agences.destroy', $agence) }}" method="POST"
-                    onsubmit="return confirm('Supprimer « {{ $agence->nom_agence }} » ?');">
+                    data-confirm="Supprimer l'agence immobilière « {{ $agence->nom_agence }} » ?"
+                    data-confirm-title="Supprimer l'agence"
+                    data-confirm-btn="Supprimer l'agence"
+                    data-confirm-warning="L'agence et les biens qui lui sont rattachés seront affectés par cette suppression.">
                     @csrf @method('DELETE')
                     <button type="submit" title="Supprimer"
                         style="width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; background: #fee2e2; color: #991b1b; border: none; cursor: pointer; font-size: 0.9rem;">

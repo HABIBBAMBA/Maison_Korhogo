@@ -21,7 +21,7 @@
                 <div style="
                     width: 64px; height: 64px;
                     border-radius: 50%;
-                    background: linear-gradient(135deg, var(--primary), var(--teal));
+                    background: var(--primary);
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -44,7 +44,10 @@
                 </a>
                 @if($user->id !== auth()->id())
                 <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
-                    onsubmit="return confirm('Supprimer {{ $user->name }} ? Cette action est irréversible.');">
+                    data-confirm="Supprimer l'utilisateur « {{ $user->name }} » ({{ $user->email }}) ? Cette action est irréversible."
+                    data-confirm-title="Supprimer l'utilisateur"
+                    data-confirm-btn="Supprimer définitivement"
+                    data-confirm-warning="Toutes les informations et droits d'accès de ce compte seront révoqués immédiatement.">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-outline" style="font-size: 0.85rem; color: #e53935; border-color: #e53935;">

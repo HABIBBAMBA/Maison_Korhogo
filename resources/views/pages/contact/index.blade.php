@@ -134,7 +134,10 @@
                         <td>
                             <form action="{{ route('contacts.destroy', $contact) }}"
                                 method="POST"
-                                onsubmit="return confirm('Supprimer ce message ?')">
+                                data-confirm="Confirmer la suppression du message de « {{ $contact->nom ?? $contact->email }} » ?"
+                                data-confirm-title="Supprimer le message"
+                                data-confirm-btn="Supprimer le message"
+                                data-confirm-warning="Ce message de contact sera définitivement effacé de la base de données.">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn-delete">Supprimer</button>

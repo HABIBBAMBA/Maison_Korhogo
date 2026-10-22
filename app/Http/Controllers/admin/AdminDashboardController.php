@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Agence;
-use App\Models\Bien;
+use App\Models\Annonce;
 use App\Models\Contact;
 use App\Models\User;
 
@@ -15,8 +15,8 @@ class AdminDashboardController extends Controller
         $user = auth()->user();
 
         $stats = [
-            'total_biens' => Bien::count(),
-            'biens_publies' => Bien::where('statut', 'disponible')->count(),
+            'total_biens' => Annonce::count(),
+            'biens_publies' => Annonce::where('statut', 'active')->count(),
             'total_messages' => Contact::count(),
             'nouveaux_messages' => Contact::where('created_at', '>=', now()->subWeek())->count(),
             'total_users' => User::count(),
@@ -24,7 +24,7 @@ class AdminDashboardController extends Controller
             'total_agences' => Agence::count(),
         ];
 
-        $recentBiens = Bien::latest()->take(5)->get()->map(fn ($bien) => [
+        $recentBiens = Annonce::with('user')->latest()->take(5)->get()->map(fn ($bien) => [
             'id' => $bien->id,
             'titre' => $bien->titre,
             'type_bien' => $bien->type_bien,

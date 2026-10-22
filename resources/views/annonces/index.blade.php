@@ -1,602 +1,802 @@
 @extends('layouts.app')
 
-@section('title', 'Annonces — ImmoPro')
+@section('title', 'Toutes les Annonces Immobilières — ImmoPro Côte d\'Ivoire')
 
 @section('content')
 
+<div class="catalog-page">
+    <div class="catalog-container">
+
+        {{-- En-tête de page & Fil d'Ariane --}}
+        <header class="catalog-header">
+            <nav class="catalog-breadcrumb" aria-label="Fil d'Ariane">
+                <a href="{{ url('/') }}">Accueil</a>
+                <span class="breadcrumb-sep" aria-hidden="true">/</span>
+                <span class="breadcrumb-current">Annonces</span>
+            </nav>
+
+            <div class="catalog-header-main">
+                <div>
+                    <h1 class="catalog-title">Catalogue des Annonces Immobilières</h1>
+                    <p class="catalog-subtitle">Maisons vérifiées, villas contemporaines, parcelles titrées et locaux commerciaux en Côte d'Ivoire.</p>
+                </div>
+                <div class="catalog-count-badge">
+                    <span class="count-number tabular-nums">{{ $annonces->total() }}</span>
+                    <span class="count-label">bien(s) répertorié(s)</span>
+                </div>
+            </div>
+        </header>
+
+        {{-- ╔══════════════════════════════════════════════════════════════════════╗
+             ║  BARRE DE FILTRAGE TECHNIQUE (SURFACE SOLIDE SURÉLEVÉE)              ║
+             ╚══════════════════════════════════════════════════════════════════════╝ --}}
+        <form action="{{ route('annonces.index') }}" method="GET" class="filter-panel" role="search">
+            {{-- Champ de recherche textuelle --}}
+            <div class="filter-col filter-col-search">
+                <label for="filter-recherche" class="filter-label">Recherche par mot-clé</label>
+                <div class="filter-input-wrap">
+                    <i class="bi bi-search filter-icon" aria-hidden="true"></i>
+                    <input
+                        type="text"
+                        name="recherche"
+                        id="filter-recherche"
+                        class="filter-control with-icon"
+                        placeholder="Quartier, ville, titre..."
+                        value="{{ request('recherche') }}">
+                </div>
+            </div>
+
+            {{-- Type de bien --}}
+            <div class="filter-col">
+                <label for="filter-type" class="filter-label">Type de bien</label>
+                <div class="filter-select-wrap">
+                    <select name="type_bien" id="filter-type" class="filter-control">
+                        <option value="">Tous les types</option>
+                        <option value="residence_meublee" {{ request('type_bien') == 'residence_meublee' ? 'selected' : '' }}>Résidence Meublée</option>
+                        <option value="chambre_hotel" {{ request('type_bien') == 'chambre_hotel' ? 'selected' : '' }}>Chambre d'Hôtel / Auberge</option>
+                        <option value="maison" {{ request('type_bien') == 'maison' ? 'selected' : '' }}>Maison (Villa, Appartement)</option>
+                        <option value="terrain" {{ request('type_bien') == 'terrain' ? 'selected' : '' }}>Terrain</option>
+                        <option value="bureau" {{ request('type_bien') == 'bureau' ? 'selected' : '' }}>Bureau</option>
+                        <option value="magasin" {{ request('type_bien') == 'magasin' ? 'selected' : '' }}>Magasin</option>
+                        <option value="entrepot" {{ request('type_bien') == 'entrepot' ? 'selected' : '' }}>Entrepôt</option>
+                        <option value="autre" {{ request('type_bien') == 'autre' ? 'selected' : '' }}>Autre</option>
+                    </select>
+                    <i class="bi bi-chevron-down select-arrow" aria-hidden="true"></i>
+                </div>
+            </div>
+
+            {{-- Type d'offre / Transaction --}}
+            <div class="filter-col">
+                <label for="filter-offre" class="filter-label">Transaction</label>
+                <div class="filter-select-wrap">
+                    <select name="type_offre" id="filter-offre" class="filter-control">
+                        <option value="">Toutes les offres</option>
+                        <option value="vente" {{ request('type_offre') == 'vente' ? 'selected' : '' }}>Vente</option>
+                        <option value="location" {{ request('type_offre') == 'location' ? 'selected' : '' }}>Location classique</option>
+                        <option value="court_sejour" {{ request('type_offre') == 'court_sejour' ? 'selected' : '' }}>Court séjour (Résidences & Hôtels)</option>
+                    </select>
+                    <i class="bi bi-chevron-down select-arrow" aria-hidden="true"></i>
+                </div>
+            </div>
+
+            {{-- Prix minimum --}}
+            <div class="filter-col">
+                <label for="filter-prix-min" class="filter-label">Prix min (FCFA)</label>
+                <input
+                    type="number"
+                    name="prix_min"
+                    id="filter-prix-min"
+                    class="filter-control tabular-nums"
+                    placeholder="0"
+                    min="0"
+                    step="50000"
+                    value="{{ request('prix_min') }}">
+            </div>
+
+            {{-- Prix maximum --}}
+            <div class="filter-col">
+                <label for="filter-prix-max" class="filter-label">Prix max (FCFA)</label>
+                <input
+                    type="number"
+                    name="prix_max"
+                    id="filter-prix-max"
+                    class="filter-control tabular-nums"
+                    placeholder="Illimité"
+                    min="0"
+                    step="50000"
+                    value="{{ request('prix_max') }}">
+            </div>
+
+            {{-- Boutons d'action --}}
+            <div class="filter-actions-group">
+                <button type="submit" class="btn btn-cta btn-filter-submit">
+                    <i class="bi bi-funnel-fill" aria-hidden="true"></i>
+                    <span>Filtrer</span>
+                </button>
+                @if(request()->hasAny(['recherche', 'type_bien', 'type_offre', 'prix_min', 'prix_max']))
+                <a href="{{ route('annonces.index') }}" class="btn btn-secondary btn-filter-reset" title="Réinitialiser tous les filtres">
+                    <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                    <span>Effacer</span>
+                </a>
+                @endif
+            </div>
+        </form>
+
+        {{-- ╔══════════════════════════════════════════════════════════════════════╗
+             ║  GRILLE DES BIENS IMMOBILIERS                                       ║
+             ╚══════════════════════════════════════════════════════════════════════╝ --}}
+        @if($annonces->count() > 0)
+        <div class="catalog-grid">
+            @foreach($annonces as $annonce)
+            <article class="catalog-card" onclick="window.location='{{ route('annonces.show', $annonce) }}'">
+                {{-- Cadre média 16:10 --}}
+                <div class="catalog-card-media">
+                    @if($annonce->premiere_image)
+                        <img
+                            src="{{ $annonce->premiere_image }}"
+                            alt="{{ $annonce->titre }}"
+                            class="catalog-img"
+                            loading="lazy">
+                    @elseif($annonce->images && count($annonce->images) > 0)
+                        <img
+                            src="{{ asset('storage/' . $annonce->images[0]) }}"
+                            alt="{{ $annonce->titre }}"
+                            class="catalog-img"
+                            loading="lazy">
+                    @else
+                        <div class="catalog-placeholder" aria-hidden="true">
+                            <i class="bi bi-building"></i>
+                            <span>Visuel non fourni</span>
+                        </div>
+                    @endif
+
+                    {{-- Badges matériels solides --}}
+                    <div class="catalog-badges-wrap">
+                        <span class="badge-solid {{ $annonce->isCourtSejour() ? 'badge-court-sejour' : ($annonce->type_offre === 'vente' ? 'badge-vente' : 'badge-location') }}">
+                            {{ $annonce->isCourtSejour() ? 'COURT SÉJOUR' : strtoupper($annonce->type_offre ?? 'VENTE') }}
+                        </span>
+                        <span class="badge-solid badge-neutral">
+                            {{ $annonce->type_bien_label ?? ucfirst($annonce->type_bien ?? 'Bien') }}
+                        </span>
+                    </div>
+
+                    {{-- Compteur de photos --}}
+                    @if($annonce->images && count($annonce->images) > 1)
+                    <div class="catalog-photos-count tabular-nums">
+                        <i class="bi bi-camera-fill" aria-hidden="true"></i>
+                        <span>{{ count($annonce->images) }}</span>
+                    </div>
+                    @endif
+
+                    {{-- Prix solide tabulaire --}}
+                    <div class="catalog-price-tag tabular-nums">
+                        {{ number_format($annonce->prix, 0, ',', ' ') }} <span class="currency">FCFA</span>{{ $annonce->isCourtSejour() ? '/nuit' : ($annonce->type_offre === 'location' ? '/mois' : '') }}
+                    </div>
+                </div>
+
+                {{-- Corps de la carte --}}
+                <div class="catalog-card-body">
+                    <div class="catalog-card-location">
+                        <i class="bi bi-geo-alt-fill" aria-hidden="true"></i>
+                        <span>{{ $annonce->quartier ?? $annonce->adresse ?? 'Korhogo, Côte d\'Ivoire' }}</span>
+                    </div>
+
+                    <h2 class="catalog-card-title">
+                        <a href="{{ route('annonces.show', $annonce) }}">
+                            {{ $annonce->titre }}
+                        </a>
+                    </h2>
+
+                    <p class="catalog-card-desc">
+                        {{ Str::limit($annonce->description, 115) }}
+                    </p>
+
+                    {{-- Spécifications techniques tabulaires --}}
+                    <div class="catalog-specs-row">
+                        @if($annonce->superficie)
+                        <div class="spec-item" title="Superficie">
+                            <i class="bi bi-arrows-fullscreen spec-item-icon" aria-hidden="true"></i>
+                            <span class="tabular-nums">{{ number_format($annonce->superficie, 0, ',', ' ') }}</span>
+                            <span class="spec-unit">m²</span>
+                        </div>
+                        @endif
+
+                        @if($annonce->nombre_chambres)
+                        <div class="spec-item" title="Nombre de chambres">
+                            <i class="bi bi-door-open spec-item-icon" aria-hidden="true"></i>
+                            <span class="tabular-nums">{{ $annonce->nombre_chambres }}</span>
+                            <span class="spec-unit">chb</span>
+                        </div>
+                        @endif
+
+                        @if($annonce->nombre_pieces)
+                        <div class="spec-item" title="Pièces totales">
+                            <i class="bi bi-grid-1x2 spec-item-icon" aria-hidden="true"></i>
+                            <span class="tabular-nums">{{ $annonce->nombre_pieces }}</span>
+                            <span class="spec-unit">pcs</span>
+                        </div>
+                        @endif
+                    </div>
+
+                    {{-- Pied de carte --}}
+                    <div class="catalog-card-footer">
+                        <span class="catalog-date tabular-nums">
+                            <i class="bi bi-clock" aria-hidden="true"></i>
+                            {{ $annonce->created_at ? $annonce->created_at->diffForHumans() : 'Récemment' }}
+                        </span>
+
+                        <a href="{{ route('annonces.show', $annonce) }}" class="btn btn-secondary btn-sm" onclick="event.stopPropagation();">
+                            <span>Détails</span>
+                            <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+            </article>
+            @endforeach
+        </div>
+
+        {{-- Pagination tabulaire --}}
+        <div class="catalog-pagination-wrap">
+            {{ $annonces->links() }}
+        </div>
+
+        @else
+        {{-- État vide structuré conforme aux 8 états obligatoires --}}
+        <div class="empty-results-box" role="status">
+            <div class="empty-results-icon" aria-hidden="true">
+                <i class="bi bi-search"></i>
+            </div>
+            <h3 class="empty-results-title">Aucun bien ne correspond à ces critères</h3>
+            <p class="empty-results-desc">
+                Essayez d'ajuster votre budget maximal, de sélectionner un quartier plus large ou d'effacer les filtres actuels.
+            </p>
+            <div class="empty-results-actions">
+                <a href="{{ route('annonces.index') }}" class="btn btn-primary">
+                    <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                    <span>Réinitialiser les critères</span>
+                </a>
+                @auth
+                    @if(auth()->user()->peutPublierAnnonce())
+                    <a href="{{ route('annonces.create') }}" class="btn btn-secondary">
+                        <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                        <span>Publier un bien similaire</span>
+                    </a>
+                    @endif
+                @else
+                    <a href="{{ route('annonces.create') }}" class="btn btn-secondary">
+                        <i class="bi bi-plus-lg" aria-hidden="true"></i>
+                        <span>Publier un bien similaire</span>
+                    </a>
+                @endauth
+            </div>
+        </div>
+        @endif
+
+    </div>
+</div>
+
+@push('styles')
 <style>
-    :root {
-        --index-bg: #f4f5f7;
-        --card-bg: #ffffff;
-        --dark: #1a1a2e;
-        --text: #3a3a4a;
-        --text-muted: #8888a0;
-        --teal: #0d9488;
-        --teal-hover: #0f766e;
-        --teal-light: #ccfbf1;
-        --teal-bg: #f0fdfa;
-        --vente-color: #2563eb;
-        --vente-bg: #dbeafe;
-        --location-color: #7c3aed;
-        --location-bg: #ede9fe;
-        --border: #e5e7eb;
-        --input-bg: #fafafa;
-        --radius: 16px;
-        --radius-sm: 12px;
-        --radius-xs: 8px;
-        --shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(0, 0, 0, 0.04);
-        --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.1);
-        --transition: 0.25s ease;
+    /* ╔══════════════════════════════════════════════════════════════════════╗
+       ║  STYLES CATALOGUE (STANDARDS SKILL_DESIGN, ZÉRO DÉGRADÉ)             ║
+       ╚══════════════════════════════════════════════════════════════════════╝ */
+    .catalog-page {
+        background-color: var(--surface-sunken);
+        min-height: calc(100vh - var(--nav-height));
+        padding-block: 2.5rem 5rem;
     }
 
-    .index-page {
-        background: var(--index-bg);
-        min-height: 100vh;
-        padding-bottom: 4rem;
-    }
-
-    .index-container {
-        max-width: 1200px;
+    .catalog-container {
+        max-width: 1240px;
         margin: 0 auto;
-        padding: 1.5rem;
+        padding-inline: clamp(1rem, 4vw, 2.5rem);
     }
 
-    /* ═══════ Header ═══════ */
-    .index-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 1.5rem;
-    }
-
-    .index-header h1 {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 1.6rem;
-        font-weight: 800;
-        color: var(--dark);
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-    }
-
-    .index-header h1 i {
-        color: var(--teal);
-        font-size: 1.3rem;
-    }
-
-    .results-count {
-        background: var(--teal-light);
-        color: var(--teal-hover);
-        font-size: 0.82rem;
-        font-weight: 700;
-        padding: 0.4rem 0.9rem;
-        border-radius: 50px;
-    }
-
-    /* ═══════ Filters ═══════ */
-    .filters-bar {
-        background: var(--card-bg);
-        border-radius: var(--radius);
-        box-shadow: var(--shadow);
-        padding: 1.25rem 1.5rem;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 1rem;
-        align-items: flex-end;
+    /* En-tête */
+    .catalog-header {
         margin-bottom: 2rem;
     }
 
-    .filter-group {
+    .catalog-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-bottom: 0.75rem;
+    }
+
+    .catalog-breadcrumb a {
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .catalog-breadcrumb a:hover {
+        color: var(--accent-brand);
+    }
+
+    .breadcrumb-sep {
+        color: var(--border-strong);
+    }
+
+    .breadcrumb-current {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .catalog-header-main {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .catalog-title {
+        font-size: clamp(1.75rem, 3.2vw, 2.35rem);
+        color: var(--text-primary);
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+    }
+
+    .catalog-subtitle {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        margin-top: 0.35rem;
+        max-width: 650px;
+    }
+
+    .catalog-count-badge {
+        display: flex;
+        align-items: baseline;
+        gap: 0.4rem;
+        padding: 0.45rem 0.95rem;
+        background-color: var(--surface-raised);
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-sm);
+        box-shadow: var(--shadow-raised);
+    }
+
+    .count-number {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--accent-brand);
+    }
+
+    .count-label {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* Panneau de filtres solide */
+    .filter-panel {
+        background-color: var(--surface-raised);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-raised);
+        padding: 1.25rem;
+        margin-bottom: 2.25rem;
+        display: grid;
+        grid-template-columns: 2fr 1.3fr 1.2fr 1.1fr 1.1fr auto;
+        gap: 0.85rem;
+        align-items: flex-end;
+    }
+
+    .filter-col {
         display: flex;
         flex-direction: column;
         gap: 0.35rem;
-        flex: 1;
-        min-width: 140px;
     }
 
-    .filter-group label {
+    .filter-label {
         font-size: 0.75rem;
         font-weight: 700;
-        color: var(--text-muted);
         text-transform: uppercase;
-        letter-spacing: 0.04em;
+        letter-spacing: 0.08em;
+        color: var(--text-secondary);
     }
 
-    .filter-group input,
-    .filter-group select {
-        padding: 0.65rem 0.85rem;
-        background: var(--input-bg);
-        border: 2px solid transparent;
-        border-radius: var(--radius-xs);
-        font-size: 0.88rem;
-        font-family: inherit;
-        color: var(--dark);
-        outline: none;
-        transition: all var(--transition);
+    .filter-control {
         width: 100%;
-        box-sizing: border-box;
+        height: 42px;
+        padding: 0.5rem 0.85rem;
+        background-color: var(--surface-sunken);
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-sm);
+        font-family: inherit;
+        font-size: 0.875rem;
+        color: var(--text-primary);
+        transition: border-color var(--duration-fast) var(--ease-out-expo),
+                    background-color var(--duration-fast) var(--ease-out-expo),
+                    box-shadow var(--duration-fast) var(--ease-out-expo);
     }
 
-    .filter-group input:focus,
-    .filter-group select:focus {
-        background: white;
-        border-color: var(--teal);
-        box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+    .filter-control:hover {
+        border-color: var(--border-strong);
     }
 
-    .filter-group input::placeholder {
-        color: #c0c0c0;
+    .filter-control:focus {
+        outline: none;
+        background-color: var(--surface-raised);
+        border-color: var(--accent-brand);
+        box-shadow: 0 0 0 3px oklch(0.460 0.075 195 / 0.15);
     }
 
-    .filter-group select {
-        cursor: pointer;
+    .filter-input-wrap,
+    .filter-select-wrap {
+        position: relative;
+    }
+
+    .filter-input-wrap .filter-icon {
+        position: absolute;
+        inset-inline-start: 0.85rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        pointer-events: none;
+    }
+
+    .filter-control.with-icon {
+        padding-inline-start: 2.25rem;
+    }
+
+    .filter-select-wrap select {
         appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' fill='%238888a0' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 0.75rem center;
-        padding-right: 2rem;
-    }
-
-    .filter-group-flex0 {
-        flex: 0 0 auto;
-        min-width: auto;
-    }
-
-    .btn-filter {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        padding: 0.65rem 1.25rem;
-        background: var(--teal);
-        color: white;
-        border: none;
-        border-radius: var(--radius-xs);
-        font-size: 0.88rem;
-        font-weight: 700;
+        -webkit-appearance: none;
+        padding-inline-end: 2rem;
         cursor: pointer;
-        transition: all var(--transition);
-        white-space: nowrap;
     }
 
-    .btn-filter:hover {
-        background: var(--teal-hover);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+    .filter-select-wrap .select-arrow {
+        position: absolute;
+        inset-inline-end: 0.85rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        pointer-events: none;
     }
 
-    @media (max-width: 768px) {
-        .filters-bar {
-            gap: 0.75rem;
-        }
-
-        .filter-group {
-            min-width: calc(50% - 0.5rem);
-        }
+    .filter-actions-group {
+        display: flex;
+        gap: 0.5rem;
     }
 
-    @media (max-width: 480px) {
-        .filter-group {
-            min-width: 100%;
-        }
+    .btn-filter-submit,
+    .btn-filter-reset {
+        height: 42px;
     }
 
-    /* ═══════ Grid ═══════ */
-    .annonces-grid {
+    /* Grille de cartes */
+    .catalog-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-        gap: 1.25rem;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 1.75rem;
     }
 
-    /* ═══════ Card ═══════ */
-    .annonce-card {
-        background: var(--card-bg);
-        border-radius: var(--radius);
-        box-shadow: var(--shadow);
+    .catalog-card {
+        background-color: var(--surface-raised);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-raised);
         overflow: hidden;
-        text-decoration: none;
-        color: inherit;
         display: flex;
         flex-direction: column;
-        transition: all var(--transition);
-        opacity: 0;
-        transform: translateY(20px);
-        animation: cardIn 0.45s ease forwards;
+        cursor: pointer;
+        transition: transform var(--duration-base) var(--ease-out-expo),
+                    box-shadow var(--duration-base) var(--ease-out-expo),
+                    border-color var(--duration-base) var(--ease-out-expo);
     }
 
-    .annonce-card:nth-child(1) {
-        animation-delay: 0.00s;
+    .catalog-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-card);
+        border-color: var(--border-default);
     }
 
-    .annonce-card:nth-child(2) {
-        animation-delay: 0.05s;
-    }
-
-    .annonce-card:nth-child(3) {
-        animation-delay: 0.10s;
-    }
-
-    .annonce-card:nth-child(4) {
-        animation-delay: 0.15s;
-    }
-
-    .annonce-card:nth-child(5) {
-        animation-delay: 0.20s;
-    }
-
-    .annonce-card:nth-child(6) {
-        animation-delay: 0.25s;
-    }
-
-    .annonce-card:nth-child(7) {
-        animation-delay: 0.30s;
-    }
-
-    .annonce-card:nth-child(8) {
-        animation-delay: 0.35s;
-    }
-
-    .annonce-card:nth-child(9) {
-        animation-delay: 0.40s;
-    }
-
-    .annonce-card:nth-child(10) {
-        animation-delay: 0.45s;
-    }
-
-    .annonce-card:nth-child(11) {
-        animation-delay: 0.50s;
-    }
-
-    .annonce-card:nth-child(12) {
-        animation-delay: 0.55s;
-    }
-
-    @keyframes cardIn {
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .annonce-card:hover {
-        transform: translateY(-6px);
-        box-shadow: var(--shadow-hover);
-    }
-
-    .annonce-card:hover .card-image img {
-        transform: scale(1.06);
-    }
-
-    /* ─── Card Image ─── */
-    .card-image {
+    .catalog-card-media {
         position: relative;
-        height: 210px;
+        height: 220px;
+        background-color: var(--surface-dark-base);
         overflow: hidden;
-        background: #e8e8e8;
+        border-bottom: 1px solid var(--border-subtle);
     }
 
-    .card-image img {
+    .catalog-img {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.5s ease;
+        transition: transform 400ms var(--ease-out-expo);
     }
 
-    /* ─── Badges ─── */
-    .card-badges {
+    .catalog-card:hover .catalog-img {
+        transform: scale(1.03);
+    }
+
+    .catalog-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        color: var(--text-inverse-muted);
+    }
+
+    .catalog-placeholder i {
+        font-size: 2.5rem;
+        color: var(--border-dark);
+    }
+
+    .catalog-placeholder span {
+        font-size: 0.75rem;
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+    .catalog-badges-wrap {
         position: absolute;
-        top: 0.75rem;
-        left: 0.75rem;
+        top: 0.85rem;
+        inset-inline-start: 0.85rem;
         display: flex;
         gap: 0.4rem;
+        z-index: 2;
     }
 
-    .badge {
-        padding: 0.3rem 0.7rem;
-        border-radius: 6px;
-        font-size: 0.72rem;
-        font-weight: 800;
+    .badge-solid {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 0.25rem 0.65rem;
+        border-radius: var(--radius-xs);
+        border: 1px solid transparent;
         text-transform: uppercase;
-        letter-spacing: 0.04em;
-        backdrop-filter: blur(6px);
+        letter-spacing: 0.05em;
     }
 
     .badge-vente {
-        background: rgba(37, 99, 235, 0.85);
-        color: white;
+        background-color: var(--color-primary);
+        color: #ffffff;
+        border-color: var(--color-primary);
     }
 
     .badge-location {
-        background: rgba(124, 58, 237, 0.85);
-        color: white;
+        background-color: var(--color-secondary);
+        color: #ffffff;
+        border-color: var(--color-secondary);
     }
 
-    .badge-type {
-        background: rgba(255, 255, 255, 0.85);
-        color: var(--text);
+    .badge-court-sejour {
+        background-color: var(--color-cta);
+        color: #ffffff;
+        border-color: var(--color-cta);
     }
 
-    /* ─── Photo count ─── */
-    .card-images-count {
+    .badge-neutral {
+        background-color: #ffffff;
+        color: var(--color-text-main);
+        border-color: var(--border-default);
+    }
+
+    .catalog-photos-count {
         position: absolute;
-        bottom: 0.75rem;
-        right: 0.75rem;
-        background: rgba(0, 0, 0, 0.65);
-        color: white;
-        padding: 0.3rem 0.65rem;
-        border-radius: 6px;
+        top: 0.85rem;
+        inset-inline-end: 0.85rem;
+        background-color: var(--surface-dark-base);
+        color: #ffffff;
+        padding: 0.25rem 0.6rem;
+        border-radius: var(--radius-xs);
+        border: 1px solid var(--border-dark);
         font-size: 0.75rem;
         font-weight: 600;
         display: flex;
         align-items: center;
-        gap: 0.3rem;
-        backdrop-filter: blur(4px);
+        gap: 0.35rem;
+        z-index: 2;
     }
 
-    /* ─── Card Body ─── */
-    .card-body {
-        padding: 1.1rem 1.25rem 1.35rem;
+    .catalog-price-tag {
+        position: absolute;
+        bottom: 0.85rem;
+        inset-inline-end: 0.85rem;
+        background-color: var(--surface-dark-base);
+        color: #ffffff;
+        padding: 0.35rem 0.85rem;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-dark);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.95rem;
+        font-weight: 700;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    .catalog-price-tag .currency {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--color-cta);
+    }
+
+    /* Corps */
+    .catalog-card-body {
+        padding: 1.35rem;
         display: flex;
         flex-direction: column;
-        gap: 0.45rem;
         flex: 1;
     }
 
-    .card-price {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 1.2rem;
-        font-weight: 800;
-        color: var(--teal);
+    .catalog-card-location {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--color-secondary);
+        margin-bottom: 0.35rem;
     }
 
-    .card-title {
-        font-size: 0.95rem;
+    .catalog-card-title {
+        font-size: 1.125rem;
         font-weight: 700;
-        color: var(--dark);
-        line-height: 1.35;
+        line-height: 1.3;
+        margin-bottom: 0.5rem;
+    }
+
+    .catalog-card-title a {
+        color: var(--text-primary);
+    }
+
+    .catalog-card-title a:hover {
+        color: var(--color-cta);
+    }
+
+    .catalog-card-desc {
+        font-size: 0.84rem;
+        color: var(--text-secondary);
+        line-height: 1.55;
+        margin-bottom: 1.25rem;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
 
-    .card-location {
+    .catalog-specs-row {
         display: flex;
         align-items: center;
-        gap: 0.3rem;
-        font-size: 0.82rem;
+        gap: 1.25rem;
+        padding-block: 0.85rem;
+        border-top: 1px solid var(--border-subtle);
+        margin-top: auto;
+    }
+
+    .spec-item {
+        display: flex;
+        align-items: baseline;
+        gap: 0.35rem;
+        font-size: 0.85rem;
+        color: var(--text-primary);
+        font-family: 'JetBrains Mono', monospace;
+        font-weight: 600;
+    }
+
+    .spec-item-icon {
+        font-size: 0.85rem;
         color: var(--text-muted);
     }
 
-    .card-location i {
-        color: var(--teal);
-        font-size: 0.8rem;
-    }
-
-    /* ─── Specs row ─── */
-    .card-specs {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
-        padding-top: 0.65rem;
-        border-top: 1px solid var(--border);
-    }
-
-    .card-spec {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.3rem;
-        font-size: 0.78rem;
-        font-weight: 600;
-        color: var(--text);
-        background: var(--index-bg);
-        padding: 0.3rem 0.6rem;
-        border-radius: 6px;
-    }
-
-    .card-spec i {
-        color: var(--teal);
+    .spec-unit {
         font-size: 0.75rem;
+        color: var(--text-muted);
     }
 
-    /* ═══════ Pagination ═══════ */
-    .pagination-wrapper {
+    .catalog-card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 0.85rem;
+        border-top: 1px solid var(--border-subtle);
+    }
+
+    .catalog-date {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    /* Pagination */
+    .catalog-pagination-wrap {
         display: flex;
         justify-content: center;
-        margin-top: 2.5rem;
+        margin-top: 3.5rem;
     }
 
-    .pagination-wrapper nav {
-        background: var(--card-bg);
-        border-radius: var(--radius-sm);
-        box-shadow: var(--shadow);
-        padding: 0.4rem;
-    }
-
-    /* Style Laravel default pagination if needed */
-    .pagination {
-        display: flex;
-        justify-content: center;
-    }
-
-    /* ═══════ Empty state ═══════ */
-    .empty-state {
+    /* État vide */
+    .empty-results-box {
+        background-color: var(--surface-raised);
+        border: 1px dashed var(--border-strong);
+        border-radius: var(--radius-md);
+        padding: 4.5rem 2rem;
         text-align: center;
-        padding: 4rem 2rem;
-        background: var(--card-bg);
-        border-radius: var(--radius);
-        box-shadow: var(--shadow);
+        max-width: 620px;
+        margin: 2rem auto;
     }
 
-    .empty-state i.empty-icon {
-        font-size: 4rem;
-        color: #d0d5dd;
-        margin-bottom: 1.25rem;
-        display: block;
+    .empty-results-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: var(--radius-sm);
+        background-color: var(--surface-sunken);
+        border: 1px solid var(--border-default);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        color: var(--text-muted);
+        margin: 0 auto 1.5rem;
     }
 
-    .empty-state h3 {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        font-size: 1.3rem;
-        font-weight: 800;
-        color: var(--dark);
+    .empty-results-title {
+        font-size: 1.35rem;
+        color: var(--text-primary);
         margin-bottom: 0.5rem;
     }
 
-    .empty-state p {
+    .empty-results-desc {
         font-size: 0.92rem;
-        color: var(--text-muted);
-        margin-bottom: 1.5rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin-bottom: 1.75rem;
     }
 
-    .btn-reset {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        padding: 0.7rem 1.4rem;
-        background: var(--teal);
-        color: white;
-        border: none;
-        border-radius: var(--radius-xs);
-        font-size: 0.88rem;
-        font-weight: 700;
-        text-decoration: none;
-        transition: all var(--transition);
+    .empty-results-actions {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: center;
+        flex-wrap: wrap;
     }
 
-    .btn-reset:hover {
-        background: var(--teal-hover);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .filter-panel {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .filter-col-search {
+            grid-column: 1 / -1;
+        }
+
+        .filter-actions-group {
+            grid-column: 1 / -1;
+        }
+
+        .btn-filter-submit,
+        .btn-filter-reset {
+            flex: 1;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .filter-panel {
+            grid-template-columns: 1fr;
+        }
+
+        .catalog-header-main {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .catalog-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
+@endpush
 
-<div class="index-page">
-    <div class="index-container">
-
-        {{-- Header --}}
-        <div class="index-header">
-            <h1><i class="bi bi-grid-3x3-gap-fill"></i> Annonces</h1>
-            <span class="results-count">
-                {{ $annonces->total() }} bien(s) trouvé(s)
-            </span>
-        </div>
-
-        {{-- Filtres --}}
-        <form action="{{ route('annonces.index') }}" method="GET" class="filters-bar">
-            <div class="filter-group" style="flex:2;">
-                <label>Recherche</label>
-                <input type="text" name="recherche" placeholder="Titre, ville, quartier..."
-                    value="{{ request('recherche') }}">
-            </div>
-            <div class="filter-group">
-                <label>Type</label>
-                <select name="type_bien">
-                    <option value="">Tous</option>
-                    <option value="maison" {{ request('type_bien') == 'maison' ? 'selected' : '' }}>Maison</option>
-                    <option value="appartement" {{ request('type_bien') == 'appartement' ? 'selected' : '' }}>Appartement</option>
-                    <option value="villa" {{ request('type_bien') == 'villa' ? 'selected' : '' }}>Villa</option>
-                    <option value="terrain" {{ request('type_bien') == 'terrain' ? 'selected' : '' }}>Terrain</option>
-                    <option value="bureau" {{ request('type_bien') == 'bureau' ? 'selected' : '' }}>Bureau</option>
-                    <option value="commerce" {{ request('type_bien') == 'commerce' ? 'selected' : '' }}>Commerce</option>
-                    <option value="chambre" {{ request('type_bien') == 'chambre' ? 'selected' : '' }}>Chambre</option>
-                    <option value="magasin" {{ request('type_bien') == 'magasin' ? 'selected' : '' }}>Magasin</option>
-                    <option value="entrepot" {{ request('type_bien') == 'entrepot' ? 'selected' : '' }}>Entrepôt</option>
-                    <option value="autre" {{ request('type_bien') == 'autre' ? 'selected' : '' }}>Autre</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label>Offre</label>
-                <select name="type_offre">
-                    <option value="">Toutes</option>
-                    <option value="vente" {{ request('type_offre') == 'vente' ? 'selected' : '' }}>Vente</option>
-                    <option value="location" {{ request('type_offre') == 'location' ? 'selected' : '' }}>Location</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label>Prix min</label>
-                <input type="number" name="prix_min" placeholder="0" value="{{ request('prix_min') }}">
-            </div>
-            <div class="filter-group">
-                <label>Prix max</label>
-                <input type="number" name="prix_max" placeholder="∞" value="{{ request('prix_max') }}">
-            </div>
-            <div class="filter-group filter-group-flex0">
-                <label>&nbsp;</label>
-                <button type="submit" class="btn-filter">
-                    <i class="bi bi-search"></i> Filtrer
-                </button>
-            </div>
-        </form>
-
-        {{-- Grille --}}
-        @if($annonces->count() > 0)
-        <div class="annonces-grid">
-            @foreach($annonces as $annonce)
-            <a href="{{ route('annonces.show', $annonce) }}" class="annonce-card">
-                <div class="card-image">
-                    <img src="{{ $annonce->premiere_image }}" alt="{{ $annonce->titre }}">
-                    <div class="card-badges">
-                        <span class="badge badge-{{ $annonce->categorie }}">
-                            {{ ucfirst($annonce->categorie) }}
-                        </span>
-                        <span class="badge badge-type">
-                            {{ ucfirst($annonce->type_bien) }}
-                        </span>
-                    </div>
-                    @if($annonce->nombre_images > 1)
-                    <div class="card-images-count">
-                        <i class="bi bi-camera-fill"></i> {{ $annonce->nombre_images }}
-                    </div>
-                    @endif
-                </div>
-                <div class="card-body">
-                    <div class="card-price">{{ $annonce->prix_formate }}</div>
-                    <div class="card-title">{{ $annonce->titre }}</div>
-                    <div class="card-location">
-                        <i class="bi bi-geo-alt-fill"></i>
-                        {{ $annonce->quartier ?? $annonce->adresse ?? 'Non précisé' }}
-                    </div>
-                    <div class="card-specs">
-                        @if($annonce->superficie)
-                        <span class="card-spec">
-                            <i class="bi bi-arrows-fullscreen"></i>
-                            {{ number_format($annonce->superficie, 0, ',', '.') }} m²
-                        </span>
-                        @endif
-                        @if($annonce->nombre_pieces)
-                        <span class="card-spec">
-                            <i class="bi bi-door-open"></i>
-                            {{ $annonce->nombre_pieces }} pcs
-                        </span>
-                        @endif
-                        @if($annonce->nombre_chambres)
-                        <span class="card-spec">
-                            <i class="bi bi-lamp"></i>
-                            {{ $annonce->nombre_chambres }} ch.
-                        </span>
-                        @endif
-                    </div>
-                </div>
-            </a>
-            @endforeach
-        </div>
-
-        <div class="pagination-wrapper">
-            {{ $annonces->links() }}
-        </div>
-        @else
-        <div class="empty-state">
-            <i class="bi bi-search empty-icon"></i>
-            <h3>Aucune annonce trouvée</h3>
-            <p>Modifiez vos filtres ou revenez plus tard.</p>
-            <a href="{{ route('annonces.index') }}" class="btn-reset">
-                <i class="bi bi-arrow-counterclockwise"></i> Réinitialiser les filtres
-            </a>
-        </div>
-        @endif
-
-    </div>
-</div>
 @endsection

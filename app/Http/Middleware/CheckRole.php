@@ -19,8 +19,8 @@ class CheckRole
         $user = $request->user();
 
         // Si l'utilisateur n'a PAS le rôle requis → accès refusé
-        if (!in_array($user->role, $roles)) {
-            abort(403, 'Accès non autorisé.');
+        if (! $user || ! in_array($user->role, $roles, true)) {
+            abort(403, 'Accès non autorisé. Cette action est réservée aux propriétaires et aux agences immobilières.');
         }
 
         return $next($request);

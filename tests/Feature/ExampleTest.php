@@ -32,6 +32,7 @@ class ExampleTest extends TestCase
             'name' => 'Utilisateur de test',
             'email' => 'listing-photo@example.test',
             'password' => Hash::make('password'),
+            'role' => 'proprietaire',
         ]);
 
         $this->actingAs($user)

@@ -8,7 +8,7 @@
     {{-- Header --}}
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
         <div>
-            <a href="{{ route('admin.dashboard') }}" style="font-size: 0.85rem; color: #888; text-decoration: none;">
+            <a href="{{ route('dashboard') }}" style="font-size: 0.85rem; color: #888; text-decoration: none;">
                 <i class="bi bi-arrow-left"></i> Administration
             </a>
             <h1 style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.5rem; font-weight: 800; margin-top: 0.5rem;">
@@ -97,7 +97,7 @@
                                 <div style="
                                     width: 40px; height: 40px;
                                     border-radius: 50%;
-                                    background: linear-gradient(135deg, var(--primary), var(--teal));
+                                    background: var(--primary);
                                     display: flex;
                                     align-items: center;
                                     justify-content: center;
@@ -153,7 +153,10 @@
                                 </a>
                                 @if($user->id !== auth()->id())
                                 <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
-                                    onsubmit="return confirm('Supprimer {{ $user->name }} ?');">
+                                    data-confirm="Êtes-vous certain de vouloir supprimer l'utilisateur « {{ $user->name }} » ({{ $user->email }}) ?"
+                                    data-confirm-title="Supprimer l'utilisateur"
+                                    data-confirm-btn="Supprimer l'utilisateur"
+                                    data-confirm-warning="Cette action est irréversible et supprimera le compte ainsi que ses relations associées.">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" title="Supprimer"
